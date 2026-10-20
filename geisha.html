@@ -7,7 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="landing.css">
-<style>body{--accent:#5A1E2C;--accent-2:#7A2B3D;} .hero-photo img{filter:none;object-position:50% 72%;} .price-grid{grid-template-columns:repeat(3,1fr);} @media(max-width:900px){.price-grid{grid-template-columns:1fr;}}</style>
+<style>body{--accent:#5A1E2C;--accent-2:#7A2B3D;} .hero-photo img{filter:none;object-position:50% 72%;} .price-grid{grid-template-columns:repeat(3,1fr);} @media(max-width:900px){.price-grid{grid-template-columns:1fr;}}
+.proof-grid{display:grid;grid-template-columns:1.25fr 0.75fr;gap:28px;align-items:start;}
+@media(max-width:760px){.proof-grid{grid-template-columns:1fr;}}
+.proof-link{font-size:14px;color:var(--accent);border-bottom:1px solid var(--line);align-self:flex-start;}
+.cert{display:block;border:1px solid var(--line);background:var(--card);padding:10px;}
+.cert img{display:block;width:100%;height:auto;}
+.cert-cap{font-size:14px;color:var(--ink-soft);margin-top:12px;}</style>
 </head>
 <body>
 
@@ -82,6 +88,22 @@
   </div>
 </section>
 
+<section>
+  <div class="wrap">
+    <div class="head">
+      <div class="label">Отзыв и сертификат</div>
+      <h2>Что говорят после Гейши</h2>
+    </div>
+    <div class="proof-grid">
+      <div class="rev"><p>Игра «Гейша» — это не просто костюмированная игра, это игра, где ты окунаешься в образ и проживаешь его. Задания, которые получаешь во время передвижения, буквально заставляют читать между строк и глубоко мыслить. Игра подсвечивает и раскрывает то, в чём нуждаешься на данный момент. Я думала, что во мне больше духовного смысла! Это не так! Оказалось, как раз его и не хватало. Больше я зациклилась на материальном плане — и ведь это верно. Грустненько. Удивительно: если ты не честна с собой, игра не впускает тебя. Все очки, которые я получала, удивительным образом сходились к числу 6, которое я изначально по интуиции сама выбрала. Волшебство. Игра подсветила: надо быть дипломатом в своей жизни. Очень понравилась игра! Благодарю моего проводника Анелию за прекрасную игру «Гейша». Хоть ненадолго почувствовать себя актрисой.</p><span>Эльмира, 58 лет</span><a class="proof-link" href="img/review-elmira.jpg" target="_blank" rel="noopener">Скриншот отзыва</a></div>
+      <div>
+        <a class="cert" href="img/geisha-certificate.jpg" target="_blank" rel="noopener"><img src="img/geisha-certificate.jpg" alt="Сертификат ведущей игры «Гейша», Анелия Мукаева, 2026" loading="lazy"></a>
+        <p class="cert-cap">Сертифицированная ведущая игры «Гейша» по авторской методике Виктории Чернявской, 2026.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="price-section" id="price">
   <div class="wrap">
     <div class="head">
@@ -111,7 +133,7 @@
         <a class="p-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%93%D0%B5%D0%B9%D1%88%D1%83%20%D1%81%D0%B2%D0%BE%D0%B5%D0%B9%20%D0%BA%D0%BE%D0%BC%D0%BF%D0%B0%D0%BD%D0%B8%D0%B5%D0%B9%20%E2%80%94%20%D0%BF%D0%BE%D0%B4%D1%81%D0%BA%D0%B0%D0%B6%D0%B8%D1%82%D0%B5%20%D1%81%D0%B2%D0%BE%D0%B1%D0%BE%D0%B4%D0%BD%D1%8B%D0%B5%20%D0%B4%D0%B0%D1%82%D1%8B" target="_blank" rel="noopener">Написать</a>
       </div>
     </div>
-    <p class="price-note">Автор игры — Виктория Чернявская. Хочешь играть регулярно? <a href="index.html#games">Абонемент на 3 групповые игры</a> — на 15% выгоднее. Пришла с подругой — 5 000 ₸ скидки на твою следующую групповую игру.</p>
+    <p class="price-note">Автор игры — Виктория Чернявская, я сертифицированная ведущая. Хочешь играть регулярно? <a href="index.html#games">Абонемент на 3 групповые игры</a> — на 15% выгоднее. Пришла с подругой — 5 000 ₸ скидки на твою следующую групповую игру.</p>
   </div>
 </section>
 
