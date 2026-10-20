@@ -198,7 +198,9 @@
   .packages{
     display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
   }
-  @media(max-width:860px){.packages{grid-template-columns:1fr;}}
+  .packages.two{grid-template-columns:repeat(2,1fr);max-width:780px;}
+  @media(max-width:860px){.packages,.packages.two{grid-template-columns:1fr;}}
+  .package-note{font-size:14.5px;color:var(--ink-soft);margin-top:26px;max-width:640px;}
   .package-card{
     background:var(--card);
     border:1px solid var(--line);
@@ -337,7 +339,8 @@
   .sub-heading{font-size:30px;color:var(--cream);margin-bottom:14px;}
   .sub-intro{font-size:16px;color:rgba(246,241,231,0.75);max-width:600px;margin-bottom:36px;}
   .sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-  @media(max-width:760px){.sub-grid{grid-template-columns:1fr;}}
+  .sub-grid.two{grid-template-columns:repeat(2,1fr);max-width:720px;}
+  @media(max-width:760px){.sub-grid,.sub-grid.two{grid-template-columns:1fr;}}
   .sub-card{
     background:rgba(246,241,231,0.06);
     border:1px solid rgba(246,241,231,0.2);
@@ -524,12 +527,12 @@
 <section class="hero">
   <div class="hero-bg"><img src="img/photo1.jpg" alt="Анелия"></div>
   <div class="wrap hero-content">
-    <div class="hero-eyebrow">ERICKSON COACH (ICF LEVEL 1) · ТРАНСФОРМАЦИОННЫЙ ИГРОПРАКТИК</div>
-    <h1>Меняю состояние — а из него уже рождаются результаты</h1>
-    <p class="hero-sub">Я помогаю тебе прийти к тому, о чём ты действительно мечтаешь — снять маски, услышать свои настоящие желания и начать двигаться к цели из любви и лёгкости, а не из страха.</p>
+    <div class="hero-eyebrow">КОУЧ · ТРАНСФОРМАЦИОННЫЙ ИГРОПРАКТИК</div>
+    <h1>Помогаю женщинам перестать бояться своей цены и выйти на свой доход</h1>
+    <p class="hero-sub">Через трансформационные игры и коучинг: сначала возвращаем состояние и видим, что держит, потом — конкретные шаги к деньгам, своему делу и жизни, которую ты хочешь.</p>
     <div class="cta-row">
-      <a href="#coaching" class="btn btn-primary">Коучинг</a>
-      <a href="#games" class="btn btn-ghost">Трансформационные игры</a>
+      <a href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%93%D0%B5%D0%B9%D1%88%D1%83%20%E2%80%94%20%D0%BF%D0%BE%D0%B4%D1%81%D0%BA%D0%B0%D0%B6%D0%B8%D1%82%D0%B5%20%D0%B1%D0%BB%D0%B8%D0%B6%D0%B0%D0%B9%D1%88%D1%83%D1%8E%20%D0%B4%D0%B0%D1%82%D1%83" target="_blank" rel="noopener" class="btn btn-primary">Записаться на Гейшу</a>
+      <a href="#coaching" class="btn btn-ghost">Коучинг «Своя цена»</a>
     </div>
   </div>
 </section>
@@ -541,7 +544,7 @@
       <div class="section-label">О себе</div>
       <h2>Пространство, где ты возвращаешься к себе</h2>
       <p>Работаю на стыке коучинга и трансформационных игр: сочетаю коучинговые инструменты, NLP-техники, медитации, работу с МАК-картами и — по необходимости — элементы регрессии, если чувствую, что именно это откроет запрос глубже.</p>
-      <p>Ко мне приходят те, кто наконец готов дать себе разрешение проявиться: выйти из долгов и выйти на доход, о котором раньше боялись даже мечтать, встретить достойного партнёра и построить отношения, наполненные любовью, создать жизнь мечты — свой дом, своё дело, свою реализацию.</p>
+      <p>Чаще всего ко мне приходят женщины, которые многое умеют, но боятся назвать свою цену, застряли в найме или на одном и том же доходе и устали всё тащить на себе. Приходят и с другими запросами — отношения, предназначение, «не знаю, чего хочу», — с ними я тоже работаю.</p>
       <p>Игра даёт быстрый и глубокий инсайт. Коучинг — сопровождение на дистанции: вместе мы системно закрепляем новые привычки и убеждения, чтобы результат пришёл быстрее и устойчивее, чем в одиночку.</p>
       <p>Мой путь сюда начался с внутреннего поворота: однажды я поняла, что живу не своей жизнью — на нелюбимой работе, не используя и половины своего потенциала. Я начала задавать себе честные вопросы «в чём моё предназначение», и ответы стали приходить — через людей, книги, случайные фразы. Так я пришла в коучинг через Erickson Coaching International — и с тех пор это моя настоящая реализация.</p>
       <div class="fact-strip">
@@ -559,70 +562,58 @@
     <div class="package-photo"><img src="img/photo3.jpg" alt="Коучинг с Анелией"></div>
     <div class="section-head">
       <div class="section-label">Коучинг</div>
-      <h2>Пошаговое сопровождение к твоей цели</h2>
-      <p>Регулярная работа, в которой ты не остаёшься один на один со своими решениями — вместе мы двигаемся от точки А к точке Б и закрепляем изменения, чтобы они остались с тобой навсегда.</p>
+      <h2>«Своя цена»: от страха назвать стоимость — к своему доходу</h2>
+      <p>Коучинг для тех, кто упирается не в знания, а в страх: поднять цену, попросить больше, уйти из найма в своё дело. Находим, что именно держит, и превращаем это в конкретные шаги, которые ты делаешь между встречами.</p>
     </div>
 
     <div class="fit-grid">
       <div class="fit-card">
-        <div class="fit-title">Ощущение застоя</div>
-        <p>Чувствуешь, что стоишь и не понимаешь, в чём «затык» — хотя вроде всё делаешь правильно.</p>
+        <div class="fit-title">Страшно назвать цену</div>
+        <p>Занижаешь стоимость, делаешь скидку раньше, чем попросили, и чувствуешь вину, когда берёшь деньги.</p>
       </div>
       <div class="fit-card">
-        <div class="fit-title">Упадок мотивации и энергии</div>
-        <p>Раньше горело внутри, а сейчас будто выключили свет — и непонятно, как вернуть себе интерес.</p>
+        <div class="fit-title">Доход стоит на месте</div>
+        <p>Работаешь много, а сумма в месяц не меняется — и непонятно, что держит.</p>
       </div>
       <div class="fit-card">
-        <div class="fit-title">Важное решение впереди</div>
-        <p>Стоишь перед выбором (карьера, отношения, переезд) и хочешь принять его из ясности, а не из страха.</p>
+        <div class="fit-title">Хочется уйти из найма</div>
+        <p>Есть идея своего дела, но страх и «а вдруг не получится» пока сильнее.</p>
       </div>
       <div class="fit-card">
-        <div class="fit-title">Время системных перемен</div>
-        <p>Понимаешь, что разовый разговор не решит — нужна опора и сопровождение на дистанции.</p>
+        <div class="fit-title">Соглашаешься на меньшее</div>
+        <p>В работе, в деньгах, в отношениях — привычка брать то, что дают, а не то, чего хочешь.</p>
       </div>
     </div>
 
-    <div class="packages">
+    <div class="packages two">
       <div class="package-card">
-        <div class="package-name">Консультация</div>
-        <div class="package-meta">Разовая коуч-сессия</div>
-        <div class="package-price">25 000 ₸ <span>/ 50$</span></div>
+        <div class="package-name">Разбор</div>
+        <div class="package-meta">Одна сессия · 60–75 минут, Zoom или очно</div>
+        <div class="package-price">15 000 ₸ <span>/ 30$</span></div>
         <ul class="package-list">
-          <li>60–75 минут, Zoom или очно</li>
-          <li>Разбор ситуации со стороны</li>
-          <li>Понимание корневой причины</li>
-          <li>Первое направление и план шагов</li>
-          <li>Техники снятия тревожности по ситуации</li>
+          <li>Разбираем твою ситуацию с деньгами или работой</li>
+          <li>Находим, что именно держит: страх, установка, привычка</li>
+          <li>Уходишь с первым конкретным шагом</li>
+          <li>Если продолжаем — 15 000 ₸ засчитываются в программу</li>
         </ul>
-        <a href="#contact" class="package-cta">Записаться</a>
-      </div>
-
-      <div class="package-card">
-        <div class="package-name">Мини-пакет</div>
-        <div class="package-meta">3 сессии, раз в неделю</div>
-        <div class="package-price">65 000 ₸ <span>/ 120$</span></div>
-        <ul class="package-list">
-          <li>Ясность в целях и желаниях</li>
-          <li>Пространство, где тебя слышат</li>
-          <li>Первые изменения уже в процессе</li>
-          <li>Техники снижения тревожности и фокуса</li>
-        </ul>
-        <a href="#contact" class="package-cta">Записаться</a>
+        <a href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F%20%D0%BD%D0%B0%20%D1%80%D0%B0%D0%B7%D0%B1%D0%BE%D1%80%20%C2%AB%D0%A1%D0%B2%D0%BE%D1%8F%20%D1%86%D0%B5%D0%BD%D0%B0%C2%BB" target="_blank" rel="noopener" class="package-cta">Записаться на разбор</a>
       </div>
 
       <div class="package-card featured">
-        <div class="package-name">Пакет глубинной работы</div>
-        <div class="package-meta">10 сессий, раз в неделю</div>
-        <div class="package-price">200 000 ₸ <span>/ 370$</span></div>
+        <div class="package-name">Программа «Своя цена»</div>
+        <div class="package-meta">4 недели · 4 сессии, раз в неделю</div>
+        <div class="package-price">90 000 ₸ <span>/ 180$</span></div>
         <ul class="package-list">
-          <li>Пошаговое движение от А к цели</li>
-          <li>Регулярная обратная связь</li>
-          <li>Техники для долгосрочного закрепления</li>
-          <li>Поддержка между встречами (чат/аудио)</li>
+          <li>Цель в деньгах или деле и план на 4 недели</li>
+          <li>Каждую неделю — действие: поднять цену, сделать предложение, поговорить о повышении</li>
+          <li>Работа со страхом и чувством вины за деньги</li>
+          <li>Поддержка между встречами в чате</li>
+          <li>После разбора — доплата 75 000 ₸</li>
         </ul>
-        <a href="#contact" class="package-cta">Записаться</a>
+        <a href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D1%83%D0%B7%D0%BD%D0%B0%D1%82%D1%8C%20%D0%BF%D1%80%D0%BE%20%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D1%83%20%C2%AB%D0%A1%D0%B2%D0%BE%D1%8F%20%D1%86%D0%B5%D0%BD%D0%B0%C2%BB" target="_blank" rel="noopener" class="package-cta">Узнать о программе</a>
       </div>
     </div>
+    <p class="package-note">Хочешь работать дольше? После программы можно продолжить — 10 сессий за 200 000 ₸, обсуждаем лично.</p>
   </div>
 </section>
 
@@ -658,6 +649,31 @@
     <div class="game-cards">
       <div class="game-card">
         <div>
+          <div class="game-photo-mini"><img src="img/geisha-hero.jpg" alt="Игра Гейша"></div>
+          <div class="game-title">Гейша</div>
+          <p class="game-desc">Женская игра автора Виктории Чернявской — про состояние и энергию. Она показывает, что тебя наполняет, а что забирает силы, и помогает соединить духовное и материальное: внутренний рост и жизнь в достатке. Тёплый женский круг, после которого хочется действовать.</p>
+          <p class="game-desc">Можно прийти в группу по воскресеньям или собрать свою компанию — на день рождения, девичник или встречу подруг.</p>
+          <div class="game-tags">
+            <span class="game-tag">Индивидуально: 2 часа</span>
+            <span class="game-tag">Группа (до 6 чел.): до 4 часов</span>
+            <span class="game-tag">Энергия и состояние</span>
+            <span class="game-tag">Баланс женского и мужского</span>
+            <span class="game-tag">Желания и цели</span>
+            <span class="game-tag">Женская игра</span>
+            <span class="game-tag">Мужчина — в роли Императора</span>
+          </div>
+          <a href="geisha.html" class="game-more">Подробнее об игре →</a>
+        </div>
+        <div class="game-pricing">
+          <div class="price-row">Группа (до 6 чел.) <b>25 000 ₸</b></div>
+          <div class="price-row">Индивидуально <b>50 000 ₸</b></div>
+          <div class="price-row">Своей компанией (до 6) <b>120 000 ₸</b></div>
+          <a href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%93%D0%B5%D0%B9%D1%88%D1%83%20%E2%80%94%20%D0%BF%D0%BE%D0%B4%D1%81%D0%BA%D0%B0%D0%B6%D0%B8%D1%82%D0%B5%20%D0%B1%D0%BB%D0%B8%D0%B6%D0%B0%D0%B9%D1%88%D1%83%D1%8E%20%D0%B4%D0%B0%D1%82%D1%83" target="_blank" rel="noopener" class="package-cta" style="border-color:rgba(246,241,231,0.4);color:var(--cream);">Записаться</a>
+        </div>
+      </div>
+
+      <div class="game-card">
+        <div>
           <div class="game-title">Лила</div>
           <p class="game-desc">Лила — древняя, прекрасная в своей простоте практика, пришедшая из Индии: карты и клетки поля, за которыми оживает карта твоей собственной души. Она мягко соединяет тебя с интуицией, подсвечивает повторяющиеся сценарии и шаг за шагом ведёт туда, где мешает не жизнь, а старые узоры мышления.</p>
           <div class="game-tags">
@@ -673,7 +689,7 @@
         <div class="game-pricing">
           <div class="price-row">Группа (от 2 чел.) <b>25 000 ₸</b></div>
           <div class="price-row">Индивидуально <b>50 000 ₸</b></div>
-          <a href="#contact" class="package-cta" style="border-color:rgba(246,241,231,0.4);color:var(--cream);">Записаться</a>
+          <a href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%B8%D0%B3%D1%80%D1%83%20%C2%AB%D0%9B%D0%B8%D0%BB%D0%B0%C2%BB" target="_blank" rel="noopener" class="package-cta" style="border-color:rgba(246,241,231,0.4);color:var(--cream);">Записаться</a>
         </div>
       </div>
 
@@ -693,61 +709,31 @@
         <div class="game-pricing">
           <div class="price-row">Группа (от 4 чел.) <b>20 000 ₸</b></div>
           <div class="price-row">Индивидуально <b>40 000 ₸</b></div>
-          <a href="#contact" class="package-cta" style="border-color:rgba(246,241,231,0.4);color:var(--cream);">Записаться</a>
+          <a href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%B8%D0%B3%D1%80%D1%83%20%C2%AB%D0%A2%D0%B5%D1%80%D1%80%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D1%8F%20%D0%B4%D0%B5%D0%BD%D0%B5%D0%B3%C2%BB" target="_blank" rel="noopener" class="package-cta" style="border-color:rgba(246,241,231,0.4);color:var(--cream);">Записаться</a>
         </div>
       </div>
 
-      <div class="game-card">
-        <div>
-          <div class="game-photo-mini"><img src="img/geisha-hero.jpg" alt="Игра Гейша"></div>
-          <div class="game-title">Гейша</div>
-          <p class="game-desc">Гейша — самая желанная игра, автор методики — Виктория Чернявская. В ней соединены духовное и материальное: игра поднимает вибрацию и показывает, что именно её снижает. В основе — квантовый принцип: реальность собирается в результат из состояния наблюдателя. Игра создаёт именно это состояние — и вслед за ним начинает меняться жизнь.</p>
-          <div class="game-tags">
-            <span class="game-tag">Индивидуально: 2 часа</span>
-            <span class="game-tag">Группа (до 6 чел.): до 4 часов</span>
-            <span class="game-tag">Баланс духовного и материального</span>
-            <span class="game-tag">Повышение вибрации и энергии</span>
-            <span class="game-tag">Баланс женского и мужского</span>
-            <span class="game-tag">Женская игра</span>
-            <span class="game-tag">Мужчина — в роли Императора</span>
-            <span class="game-tag">Реализация желаний и целей</span>
-          </div>
-          <a href="geisha.html" class="game-more">Подробнее об игре →</a>
-        </div>
-        <div class="game-pricing">
-          <div class="price-row">Группа (до 6 чел.) <b>25 000 ₸</b></div>
-          <div class="price-row">Индивидуально <b>50 000 ₸</b></div>
-          <a href="#contact" class="package-cta" style="border-color:rgba(246,241,231,0.4);color:var(--cream);">Записаться</a>
-        </div>
-      </div>
     </div>
 
     <div class="subscription-block">
-      <div class="section-label" style="margin-top:56px;">Абонемент на групповые игры</div>
+      <div class="section-label" style="margin-top:56px;">Абонемент и игры с подругой</div>
       <h3 class="sub-heading">Играть системой — выгоднее и глубже</h3>
-      <p class="sub-intro">Одна игра даёт инсайт здесь и сейчас. Серия игр — это возможность действительно проработать сценарий, а не просто увидеть его один раз. Абонемент на групповые игры даёт то же путешествие с ощутимой скидкой.</p>
-      <div class="sub-grid">
-        <div class="sub-card">
-          <div class="sub-name">3 игры</div>
+      <p class="sub-intro">Одна игра даёт инсайт здесь и сейчас. Серия игр — это возможность действительно проработать сценарий, а не просто увидеть его один раз.</p>
+      <div class="sub-grid two">
+        <div class="sub-card sub-featured">
+          <div class="sub-name">Абонемент на 3 игры</div>
           <div class="sub-price">55 000 ₸</div>
           <div class="sub-per">≈ 18 300 ₸ / игра</div>
           <div class="sub-save">Скидка 15%</div>
         </div>
-        <div class="sub-card sub-featured">
-          <div class="sub-badge">Оптимальный выбор</div>
-          <div class="sub-name">5 игр</div>
-          <div class="sub-price">86 500 ₸</div>
-          <div class="sub-per">17 300 ₸ / игра</div>
-          <div class="sub-save">Скидка 20%</div>
-        </div>
         <div class="sub-card">
-          <div class="sub-name">10 игр</div>
-          <div class="sub-price">162 500 ₸</div>
-          <div class="sub-per">16 250 ₸ / игра</div>
-          <div class="sub-save">Скидка 25%</div>
+          <div class="sub-name">Приходи с подругой</div>
+          <div class="sub-price">−5 000 ₸</div>
+          <div class="sub-per">на твою следующую групповую игру</div>
+          <div class="sub-save">За каждую подругу, которая пришла впервые</div>
         </div>
       </div>
-      <p class="sub-note">Абонемент действует на групповой формат любой из игр (Лила, Территория денег, Гейша) по расписанию — можно комбинировать под свои запросы. Скидка считается от средней стоимости места в группе. Индивидуальные игры оплачиваются отдельно.</p>
+      <p class="sub-note">Абонемент действует на групповой формат любой из игр (Гейша, Лила, Территория денег) — можно комбинировать под свои запросы. Индивидуальные игры и игры своей компанией оплачиваются отдельно.</p>
     </div>
   </div>
 </section>
@@ -756,32 +742,35 @@
   <div class="wrap">
     <div class="section-head">
       <div class="section-label">Расписание игр</div>
-      <h2>Три групповые игры каждую неделю</h2>
-      <p>Места в группе ограничены. Напиши, на какую игру хочешь, — пришлю ближайшую дату и адрес.</p>
+      <h2>Гейша — каждое воскресенье, Лила и Территория денег — по набору</h2>
+      <p>На Гейшу можно записаться на ближайшее воскресенье. Лилу и Территорию денег проводим, когда собирается группа: оставь заявку — напишу, как только наберётся состав, и пришлю дату и адрес.</p>
     </div>
     <div class="afisha-list">
       <div class="afisha-row">
-        <div class="afisha-date"><span class="afisha-day">Ср</span><span class="afisha-month">19:00</span><span class="afisha-wd">каждую неделю</span></div>
-        <div>
-          <div class="afisha-game"><a href="dengi.html">Территория денег</a></div>
-          <div class="afisha-meta"><span>до 3 часов</span><span>Группа от 4 человек</span><span>Для мужчин и женщин</span></div>
-        </div>
-        <div class="afisha-side"><div class="afisha-price">20 000 ₸</div><a class="afisha-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%B8%D0%B3%D1%80%D1%83%20%C2%AB%D0%A2%D0%B5%D1%80%D1%80%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D1%8F%20%D0%B4%D0%B5%D0%BD%D0%B5%D0%B3%C2%BB%20%D0%B2%20%D1%81%D1%80%D0%B5%D0%B4%D1%83" target="_blank" rel="noopener">Записаться</a></div>
-      </div>      <div class="afisha-row">
-        <div class="afisha-date"><span class="afisha-day">Сб</span><span class="afisha-month">12:00</span><span class="afisha-wd">каждую неделю</span></div>
-        <div>
-          <div class="afisha-game"><a href="lila.html">Лила</a></div>
-          <div class="afisha-meta"><span>~4 часа</span><span>Группа до 8 человек</span><span>Для мужчин и женщин</span></div>
-        </div>
-        <div class="afisha-side"><div class="afisha-price">25 000 ₸</div><a class="afisha-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%B8%D0%B3%D1%80%D1%83%20%C2%AB%D0%9B%D0%B8%D0%BB%D0%B0%C2%BB%20%D0%B2%20%D1%81%D1%83%D0%B1%D0%B1%D0%BE%D1%82%D1%83" target="_blank" rel="noopener">Записаться</a></div>
-      </div>      <div class="afisha-row">
         <div class="afisha-date"><span class="afisha-day">Вс</span><span class="afisha-month">12:00</span><span class="afisha-wd">каждую неделю</span></div>
         <div>
           <div class="afisha-game"><a href="geisha.html">Гейша</a></div>
           <div class="afisha-meta"><span>до 4 часов</span><span>Группа до 6 человек</span><span class="afisha-seats">Женский круг</span></div>
         </div>
-        <div class="afisha-side"><div class="afisha-price">25 000 ₸</div><a class="afisha-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5!%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%B8%D0%B3%D1%80%D1%83%20%C2%AB%D0%93%D0%B5%D0%B9%D1%88%D0%B0%C2%BB%20%D0%B2%20%D0%B2%D0%BE%D1%81%D0%BA%D1%80%D0%B5%D1%81%D0%B5%D0%BD%D1%8C%D0%B5" target="_blank" rel="noopener">Записаться</a></div>
-      </div>    </div>
+        <div class="afisha-side"><div class="afisha-price">25 000 ₸</div><a class="afisha-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%93%D0%B5%D0%B9%D1%88%D1%83%20%D0%B2%20%D0%B1%D0%BB%D0%B8%D0%B6%D0%B0%D0%B9%D1%88%D0%B5%D0%B5%20%D0%B2%D0%BE%D1%81%D0%BA%D1%80%D0%B5%D1%81%D0%B5%D0%BD%D1%8C%D0%B5" target="_blank" rel="noopener">Записаться</a></div>
+      </div>
+      <div class="afisha-row">
+        <div class="afisha-date"><span class="afisha-day">Сб</span><span class="afisha-month">12:00</span><span class="afisha-wd">по набору</span></div>
+        <div>
+          <div class="afisha-game"><a href="lila.html">Лила</a></div>
+          <div class="afisha-meta"><span>~4 часа</span><span>Группа от 2 до 8 человек</span><span>Для мужчин и женщин</span></div>
+        </div>
+        <div class="afisha-side"><div class="afisha-price">25 000 ₸</div><a class="afisha-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9E%D1%81%D1%82%D0%B0%D0%B2%D0%BB%D1%8F%D1%8E%20%D0%B7%D0%B0%D1%8F%D0%B2%D0%BA%D1%83%20%D0%BD%D0%B0%20%D0%9B%D0%B8%D0%BB%D1%83%20%E2%80%94%20%D0%BD%D0%B0%D0%BF%D0%B8%D1%88%D0%B8%D1%82%D0%B5%2C%20%D0%BA%D0%BE%D0%B3%D0%B4%D0%B0%20%D1%81%D0%BE%D0%B1%D0%B5%D1%80%D1%91%D1%82%D1%81%D1%8F%20%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D0%B0" target="_blank" rel="noopener">Оставить заявку</a></div>
+      </div>
+      <div class="afisha-row">
+        <div class="afisha-date"><span class="afisha-day">Ср</span><span class="afisha-month">19:00</span><span class="afisha-wd">по набору</span></div>
+        <div>
+          <div class="afisha-game"><a href="dengi.html">Территория денег</a></div>
+          <div class="afisha-meta"><span>до 3 часов</span><span>Группа от 4 человек</span><span>Для мужчин и женщин</span></div>
+        </div>
+        <div class="afisha-side"><div class="afisha-price">20 000 ₸</div><a class="afisha-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9E%D1%81%D1%82%D0%B0%D0%B2%D0%BB%D1%8F%D1%8E%20%D0%B7%D0%B0%D1%8F%D0%B2%D0%BA%D1%83%20%D0%BD%D0%B0%20%D0%A2%D0%B5%D1%80%D1%80%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D1%8E%20%D0%B4%D0%B5%D0%BD%D0%B5%D0%B3%20%E2%80%94%20%D0%BD%D0%B0%D0%BF%D0%B8%D1%88%D0%B8%D1%82%D0%B5%2C%20%D0%BA%D0%BE%D0%B3%D0%B4%D0%B0%20%D1%81%D0%BE%D0%B1%D0%B5%D1%80%D1%91%D1%82%D1%81%D1%8F%20%D0%B3%D1%80%D1%83%D0%BF%D0%BF%D0%B0" target="_blank" rel="noopener">Оставить заявку</a></div>
+      </div>
+    </div>
     <p class="afisha-note">Не подходят день или время? Напиши, и мы подберём удобную дату индивидуально — и для групповой игры, и для личной.</p>
   </div>
 </section>
@@ -816,11 +805,6 @@
       <div class="review-card">
         <div class="review-tag">Т-игра «Лила»</div>
         <div class="review-quote">Анелия — невероятно чуткий и сильный проводник. Я пришла с одним запросом, но в процессе игра мягко и точно развернулась туда, где было по-настоящему важно. Столько инсайтов и внутренних открытий — до мурашек.</div>
-        <div class="review-name">Участница игры «Лила»</div>
-      </div>
-      <div class="review-card">
-        <div class="review-tag">Т-игра «Лила»</div>
-        <div class="review-quote">Благодаря навыкам коучинга ты умеешь держать пространство и партнёрские отношения в игре. Эта игра тысячу раз подтвердила ценность моей жизни. Благодарю тебя, дочь, каждый раз напоминаешь мне любить себя.</div>
         <div class="review-name">Участница игры «Лила»</div>
       </div>
       <div class="review-card">
@@ -868,8 +852,8 @@
         <p>Одна игра даёт инсайт и снимает то, что «горит» прямо сейчас. Но убеждения и сценарии, которые годами формировали привычный результат, редко меняются за одну встречу. Серия игр — как серия тренировок: каждый раз ты заходишь немного глубже и закрепляешь новое состояние, а не просто переживаешь его один раз.</p>
       </details>
       <details class="faq-item">
-        <summary>Чем коучинг отличается от разовой консультации?</summary>
-        <p>Консультация даёт направление и первое облегчение. Но новые привычки и убеждения редко меняются за одну встречу — системная работа требует времени и повторения. Коучинг на несколько сессий — это сопровождение на дистанции: мы возвращаемся к твоим шагам, корректируем план и держим тебя в движении, пока результат не станет устойчивым, а не разовым всплеском мотивации.</p>
+        <summary>Зачем начинать с разбора, а не сразу с программы?</summary>
+        <p>Разбор — способ попробовать работу со мной без больших вложений. За одну встречу ты увидишь, что держит тебя в деньгах или работе, и поймёшь, нужна ли тебе программа. Если решишь продолжить, стоимость разбора засчитывается: доплата до программы «Своя цена» — 75 000 ₸. Программа нужна потому, что страх назвать цену редко уходит за одну встречу: за 4 недели ты не только понимаешь, но и делаешь — и мы разбираем, что получилось.</p>
       </details>
       <details class="faq-item">
         <summary>Как понять, что мне нужнее — игра или коучинг?</summary>
@@ -891,7 +875,7 @@
       <h2>Хочешь начать движение?</h2>
       <p>Напиши мне удобным способом — расскажу, как проходит игра или коучинг, и подберём формат под твой запрос.</p>
       <div class="contact-buttons">
-        <a class="contact-btn" href="https://wa.me/77757805715" target="_blank" rel="noopener">
+        <a class="contact-btn" href="https://wa.me/77757805715?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%A5%D0%BE%D1%87%D1%83%20%D1%83%D0%B7%D0%BD%D0%B0%D1%82%D1%8C%20%D0%BF%D0%BE%D0%B4%D1%80%D0%BE%D0%B1%D0%BD%D0%B5%D0%B5%20%D0%BF%D1%80%D0%BE%20%D0%B8%D0%B3%D1%80%D1%8B%20%D0%B8%20%D0%BA%D0%BE%D1%83%D1%87%D0%B8%D0%BD%D0%B3" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 6.32A7.85 7.85 0 0 0 12.03 4C7.6 4 4 7.58 4 12c0 1.44.38 2.79 1.03 3.97L4 20l4.15-1c1.11.6 2.39.95 3.75.95h.03c4.42 0 8.02-3.58 8.02-8 0-2.13-.83-4.14-2.35-5.63ZM12 18.5h-.02a6.5 6.5 0 0 1-3.31-.9l-.24-.14-2.46.65.66-2.4-.16-.25A6.5 6.5 0 0 1 5.5 12c0-3.6 2.93-6.5 6.53-6.5 1.74 0 3.38.68 4.61 1.91a6.44 6.44 0 0 1 1.9 4.6c0 3.6-2.94 6.49-6.54 6.49Zm3.56-4.87c-.19-.1-1.14-.56-1.32-.63-.18-.06-.3-.1-.44.1-.13.19-.5.63-.62.76-.11.13-.23.14-.42.05-.19-.1-.83-.31-1.58-.99-.58-.53-.97-1.17-1.09-1.37-.11-.19-.01-.3.09-.4.09-.09.19-.23.29-.35.1-.11.13-.19.19-.32.06-.13.03-.24-.02-.34-.05-.1-.44-1.08-.6-1.48-.16-.39-.32-.33-.44-.34h-.38c-.13 0-.34.05-.52.24-.18.19-.68.68-.68 1.65s.7 1.92.8 2.05c.1.13 1.38 2.16 3.36 3.02.47.2.83.33 1.12.42.47.15.9.13 1.24.08.38-.06 1.14-.47 1.3-.92.16-.45.16-.84.11-.92-.05-.09-.18-.14-.37-.24Z"/></svg>
           WhatsApp
         </a>
@@ -909,7 +893,7 @@
 </section>
 
 <footer>
-  Анелия · Erickson Coach (ICF Level 1) · Трансформационный игропрактик
+  Анелия · Коуч (Erickson Coaching International, Level 1) · Трансформационный игропрактик
 </footer>
 
 </body>
