@@ -7,7 +7,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="landing.css">
-<style>body{--accent:#1B2760;--accent-2:#2B3D8F;}</style>
+<style>body{--accent:#1B2760;--accent-2:#2B3D8F;}
+.cert-row{display:grid;grid-template-columns:1.2fr 0.8fr;gap:28px;align-items:center;margin-top:28px;}
+@media(max-width:760px){.cert-row{grid-template-columns:1fr;}}
+.cert{display:block;border:1px solid var(--line);background:var(--card);padding:10px;}
+.cert img{display:block;width:100%;height:auto;}
+.cert-cap{font-size:15px;line-height:1.6;color:var(--ink-soft);}</style>
 </head>
 <body>
 
@@ -83,13 +88,17 @@
 <section>
   <div class="wrap">
     <div class="head">
-      <div class="label">Отзывы</div>
+      <div class="label">Отзывы и сертификат</div>
       <h2>Что говорят после Лилы</h2>
     </div>
     <div class="rev-grid">
       <div class="rev"><p>Анелия — невероятно чуткий и сильный проводник. Я пришла с одним запросом, но в процессе игра мягко и точно развернулась туда, где было по-настоящему важно. Столько инсайтов и внутренних открытий — до мурашек.</p><span>Участница игры</span></div>
       <div class="rev"><p>Благодаря тебе поняла многое — в особенности перестала цепляться ко многим вещам к мужу, и теперь мы ругаемся реже. Каждая карта была про меня.</p><span>Участница игры</span></div>
       <div class="rev"><p>За два часа игры я узнала о себе невероятно много — и, пожалуй, самое ценное: желание продолжать внутренний диалог уже вне игры.</p><span>Участница игры</span></div>
+    </div>
+    <div class="cert-row">
+      <a class="cert" href="img/lila-certificate.jpg" target="_blank" rel="noopener"><img src="img/lila-certificate.jpg" alt="Сертификат «Коуч-игротерапевт Лила», RUH school, Анелия Мукаева, 2026" loading="lazy"></a>
+      <p class="cert-cap">Сертифицированный коуч-игротерапевт Лила. Курс школы RUH school, 20 академических часов с практикой, 2026.</p>
     </div>
   </div>
 </section>
