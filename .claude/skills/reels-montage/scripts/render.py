@@ -12,11 +12,14 @@ import hashlib
 import re
 import shutil
 import subprocess
+import wave
 from pathlib import Path
 
-import graphics
+import numpy as np
+
 from common import (FONTS_DIR, SFX_DIR, Timeline, ass_color, die, fmt_ts, load_json, load_style,
                     need, probe, run, workdir_for)
+from compositor import Compositor, build_overlays, build_scenes
 
 
 # ---------------------------------------------------------------- plan checks
@@ -104,7 +107,8 @@ def _esc(t: str) -> str:
     return t.replace("\\", "/").replace("{", "(").replace("}", ")")
 
 
-def build_ass(words: list[dict], tl: Timeline, plan: dict, style: dict, path: Path, sub_end: float) -> int:
+def build_ass(words: list[dict], tl: Timeline, plan: dict, style: dict, path: Path, sub_end: float,
+              splits: list[tuple[float, float]]) -> int:
     replace = {_norm(a): b for a, b in (plan.get("replace") or {}).items()}
     highlights = [_norm(h) for h in plan.get("highlight", []) if _norm(h)]
     ws = []
@@ -131,9 +135,13 @@ def build_ass(words: list[dict], tl: Timeline, plan: dict, style: dict, path: Pa
     if cur:
         chunks.append(cur)
 
-    acc, white = ass_color(style["accent"]), ass_color(style["text"])
+    def in_split(t):
+        return any(a <= t < b for a, b in splits)
+
+    acc = ass_color(style["accent"])
     caps = style.get("sub_caps")
-    x, y = style["width"] // 2, style["sub_y"]
+    karaoke = style.get("sub_active_highlight", True)
+    x = style["width"] // 2
     events = []
     for ci, ch in enumerate(chunks):
         start = ch[0]["s"]
@@ -144,20 +152,30 @@ def build_ass(words: list[dict], tl: Timeline, plan: dict, style: dict, path: Pa
         end = min(max(end, start + 0.35), sub_end)
         if nxt is not None:
             end = min(end, nxt)
-        for wi, w in enumerate(ch):
-            ws_ = start if wi == 0 else w["s"]
-            we = end if wi == len(ch) - 1 else ch[wi + 1]["s"]
+        split = in_split(start + 0.01)
+        sty, y = ("SubSplit", style["sub_y_split"]) if split else ("Sub", style["sub_y"])
+        base = ass_color(style["sub_split_color"] if split else style["text"])
+        pieces = range(len(ch)) if karaoke else [None]
+        for wi in pieces:
+            ws_ = start if not wi else ch[wi]["s"]
+            we = end if (wi is None or wi == len(ch) - 1) else ch[wi + 1]["s"]
             if we - ws_ < 0.01:
                 continue
             parts = []
             for j, o in enumerate(ch):
-                t = _esc(o["w"].upper() if (caps or o["key"]) else o["w"])
-                col = acc if (j == wi or o["key"]) else white
+                t = _esc(o["w"].upper() if (caps or (o["key"] and karaoke)) else o["w"])
+                col = acc if (j == wi or o["key"]) else base
                 parts.append(f"{{\\c{col}}}{t}")
-            anim = "\\fscx86\\fscy86\\t(0,90,\\fscx100\\fscy100)" if wi == 0 else ""
-            events.append(f"Dialogue: 0,{_ass_time(ws_)},{_ass_time(we)},Sub,,0,0,0,,"
+            if not wi:
+                anim = ("\\fscx86\\fscy86\\t(0,90,\\fscx100\\fscy100)" if karaoke
+                        else "\\fad(120,0)\\fscx96\\fscy96\\t(0,160,\\fscx100\\fscy100)")
+            else:
+                anim = ""
+            events.append(f"Dialogue: 0,{_ass_time(ws_)},{_ass_time(we)},{sty},,0,0,0,,"
                           f"{{\\pos({x},{y}){anim}}}" + " ".join(parts))
 
+    it = 1 if style.get("sub_italic") else 0
+    white = ass_color(style["text"])
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {style['width']}
@@ -167,7 +185,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sub,{style['ass_font']},{style['sub_size']},{white},{white},{ass_color(style['outline'])},{ass_color('#000000', 0x80)},0,0,0,0,100,100,0,0,1,{style['sub_outline']},{style['sub_shadow']},5,70,70,0,1
+Style: Sub,{style['ass_font']},{style['sub_size']},{white},{white},{ass_color(style['outline'])},{ass_color('#000000', 0x80)},0,{it},0,0,100,100,0,0,1,{style['sub_outline']},{style['sub_shadow']},5,70,70,0,1
+Style: SubSplit,{style['ass_font']},{style.get('sub_size_split', style['sub_size'])},{ass_color(style['sub_split_color'])},{white},{ass_color(style['panel_bg'])},{ass_color('#000000', 0xFF)},0,{it},0,0,100,100,0,0,1,0,0,5,70,70,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -176,80 +195,63 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return len(chunks)
 
 
-# ---------------------------------------------------------------- 3. overlays
-def build_overlays(plan: dict, style: dict, tl: Timeline, wd: Path) -> list[dict]:
-    odir = wd / "overlays"
-    if odir.exists():
-        shutil.rmtree(odir)
-    odir.mkdir()
-    dur = tl.duration
-    cta = plan.get("cta") or {}
-    final_s = dur - float(cta.get("final_seconds", 0) or 0) if cta.get("keyword") else dur
-    final_s = max(final_s, 0.0)
-    ovs = []
-
-    def add(kind, img_xy, start, end, sfx_kind=None):
-        start, end = max(0.0, start), min(end, dur)
-        if end - start < 0.2:
-            return
-        img, x, y = img_xy
-        p = odir / f"{len(ovs):02d}_{kind}.png"
-        img.save(p)
-        ovs.append({"png": p, "x": x, "y": y, "start": start, "end": end,
-                    "sfx": style["sfx"].get(sfx_kind or kind) if plan.get("sfx", True) else None})
-
-    heads = sorted(plan.get("headers", []), key=lambda h: h["at"])
-    for i, h in enumerate(heads):
-        s = tl.map(h["at"])
-        e = s + float(h["dur"]) if h.get("dur") else (tl.map(heads[i + 1]["at"]) if i + 1 < len(heads) else final_s)
-        add("header", graphics.header(style, h["text"]), s, min(e, final_s))
-
-    for c in plan.get("cards", []):
-        s = tl.map(c["at"])
-        add("card", graphics.card(style, c.get("title", ""), c.get("text", "")), s,
-            min(s + float(c.get("dur", 2.5)), final_s))
-
-    if cta.get("keyword"):
-        if cta.get("bar_text"):
-            add("bar", graphics.cta_bar(style, cta["bar_text"]), float(cta.get("bar_from", 3.0)), final_s)
-        if final_s < dur:
-            add("cta", graphics.cta_final(style, cta.get("title", ""), cta["keyword"], cta.get("subtitle", "")),
-                final_s, dur)
-    return ovs
+# ---------------------------------------------------------------- 3. sound effects track
+def build_sfx_track(events: list[tuple[float, str]], dur: float, volume: float, path: Path) -> bool:
+    sr = 48000
+    track = np.zeros((int(dur * sr) + sr, 2), dtype=np.float32)
+    cache, used = {}, 0
+    for t, name in events:
+        f = SFX_DIR / name
+        if not f.exists():
+            continue
+        if name not in cache:
+            with wave.open(str(f), "rb") as w:
+                data = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2").reshape(-1, w.getnchannels())
+                if data.shape[1] == 1:
+                    data = np.repeat(data, 2, axis=1)
+                cache[name] = data.astype(np.float32) / 32768
+        clip = cache[name]
+        i = int(max(t, 0) * sr)
+        n = min(len(clip), len(track) - i)
+        if n > 0:
+            track[i:i + n] += clip[:n] * volume
+            used += 1
+    if not used:
+        return False
+    pcm = (np.clip(track[: int(dur * sr)], -1, 1) * 32767).astype("<i2")
+    with wave.open(str(path), "wb") as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(sr)
+        w.writeframes(pcm.tobytes())
+    return True
 
 
-# ---------------------------------------------------------------- 4. final mix
-def final_pass(body: Path, ovs: list[dict], plan: dict, style: dict, dur: float, wd: Path, out: Path, draft: bool):
-    fps = style["fps"]
-    inputs = ["-i", body.name]
-    n_in = 1
+# ---------------------------------------------------------------- 4. final pass
+def final_pass(body: Path, comp: Compositor, splits, plan: dict, style: dict, dur: float, wd: Path,
+               out: Path, draft: bool):
+    W, H, fps = style["width"], style["height"], style["fps"]
+    inputs = ["-i", body.name, "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{W}x{H}", "-framerate", str(fps),
+              "-i", "pipe:0"]
+    n_in = 2
     fg = []
-    v = "[0:v]"
-    for i, o in enumerate(ovs):
-        idx, n_in = n_in, n_in + 1
-        L = o["end"] - o["start"]
-        inputs += ["-loop", "1", "-framerate", str(fps), "-t", f"{L + 0.1:.3f}",
-                   "-i", str(o["png"].relative_to(wd)).replace("\\", "/")]
-        fade_out = f",fade=t=out:st={max(L - 0.15, 0):.3f}:d=0.15:alpha=1" if o["end"] < dur - 0.05 else ""
-        fg.append(f"[{idx}:v]format=rgba,fade=t=in:st=0:d=0.18:alpha=1{fade_out},"
-                  f"setpts=PTS-STARTPTS+{o['start']:.3f}/TB[o{i}]")
-        s = o["start"]
-        fg.append(f"{v}[o{i}]overlay=x={o['x']}:y='{o['y']}+36*max(0,1-(t-{s:.3f})/0.18)':"
-                  f"eval=frame:enable='between(t,{s:.3f},{o['end']:.3f})'[v{i}]")
-        v = f"[v{i}]"
-    fg.append(f"{v}ass=subs.ass:fontsdir=fonts,format=yuv420p[vout]")
+    if splits:
+        en = "+".join(f"between(t,{a:.3f},{b - 0.001:.3f})" for a, b in splits)
+        fg.append("[0:v]split=2[va][vb]")
+        fg.append(f"[vb]crop={W}:{style['split_y']}:0:{style['split_crop_y']}[vtop]")
+        fg.append(f"[va][vtop]overlay=0:0:enable='{en}'[base]")
+    else:
+        fg.append("[0:v]null[base]")
+    fg.append("[base][1:v]overlay=0:0:format=auto[gfx]")
+    fg.append("[gfx]ass=subs.ass:fontsdir=fonts,format=yuv420p[vout]")
 
-    # audio: voice + sfx + optional ducked music
     fg.append("[0:a]asplit=2[voice][sc]")
     mix = ["[voice]"]
-    for i, o in enumerate(ovs):
-        if not o["sfx"] or not (SFX_DIR / o["sfx"]).exists():
-            continue
-        idx, n_in = n_in, n_in + 1
-        inputs += ["-i", str(SFX_DIR / o["sfx"])]
-        ms = int(o["start"] * 1000)
-        fg.append(f"[{idx}:a]aresample=48000,volume={style['sfx_volume']},adelay={ms}:all=1[s{i}]")
-        mix.append(f"[s{i}]")
+    if plan.get("sfx", True) and build_sfx_track(comp.sfx_events(), dur, style["sfx_volume"], wd / "sfx.wav"):
+        inputs += ["-i", "sfx.wav"]
+        fg.append(f"[{n_in}:a]aresample=48000[sfx]")
+        mix.append("[sfx]")
+        n_in += 1
     music = plan.get("music")
     if music:
         mp = Path(music)
@@ -257,11 +259,11 @@ def final_pass(body: Path, ovs: list[dict], plan: dict, style: dict, dur: float,
             mp = Path(plan["video"]).parent / mp
         if not mp.exists():
             die(f"музыка не найдена: {mp}")
-        idx, n_in = n_in, n_in + 1
         inputs += ["-stream_loop", "-1", "-i", str(mp)]
-        fg.append(f"[{idx}:a]aresample=48000,volume={style['music_volume']},atrim=duration={dur:.3f}[mus]")
+        fg.append(f"[{n_in}:a]aresample=48000,volume={style['music_volume']},atrim=duration={dur:.3f}[mus]")
         fg.append("[mus][sc]sidechaincompress=threshold=0.03:ratio=6:attack=15:release=350[duck]")
         mix.append("[duck]")
+        n_in += 1
     else:
         fg.append("[sc]anullsink")
     fg.append(f"{''.join(mix)}amix=inputs={len(mix)}:duration=first:normalize=0,"
@@ -270,11 +272,27 @@ def final_pass(body: Path, ovs: list[dict], plan: dict, style: dict, dur: float,
 
     script = wd / "filter.txt"
     script.write_text(";\n".join(fg), encoding="utf-8")
-    cmd = ["ffmpeg", "-y", *inputs, ffmpeg_filter_flag(), script.name, "-map", "[vout]", "-map", "[aout]",
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", *inputs, ffmpeg_filter_flag(), script.name,
+           "-map", "[vout]", "-map", "[aout]",
            "-c:v", "libx264", "-preset", "ultrafast" if draft else "medium", "-crf", "28" if draft else "19",
            "-profile:v", "high", "-r", str(fps), "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
            "-movflags", "+faststart", "-t", f"{dur:.3f}", str(out)]
-    run(cmd, cwd=wd)
+    log = wd / "ffmpeg_final.log"
+    with open(log, "w", encoding="utf-8", errors="replace") as lf:
+        proc = subprocess.Popen(cmd, cwd=wd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=lf)
+        total = int(round(dur * fps))
+        try:
+            for i, fr in enumerate(comp.frames(dur)):
+                proc.stdin.write(fr)
+                if i % (fps * 5) == 0:
+                    print(f"  графика: {i / fps:5.1f} / {dur:.1f} c", flush=True)
+            proc.stdin.close()
+        except (BrokenPipeError, OSError):
+            pass
+        rc = proc.wait()
+    if rc != 0:
+        tail = "\n".join(log.read_text(encoding="utf-8", errors="replace").splitlines()[-25:])
+        die(f"финальная сборка ffmpeg упала (кадров {total}):\n{tail}")
 
 
 # ---------------------------------------------------------------- main
@@ -301,18 +319,21 @@ def main():
 
     fonts = wd / "fonts"
     fonts.mkdir(exist_ok=True)
-    for f in FONTS_DIR.glob("*.otf"):
-        shutil.copy2(f, fonts / f.name)
+    for f in list(FONTS_DIR.glob("*.otf")) + list(FONTS_DIR.glob("*.ttf")):
+        if "Emoji" not in f.name and not (fonts / f.name).exists():
+            shutil.copy2(f, fonts / f.name)
 
     body = render_segments(video, keep, style, wd, args.draft, info["has_audio"])
     cta = plan.get("cta") or {}
     sub_end = tl.duration - (float(cta.get("final_seconds", 0) or 0) if cta.get("keyword") and cta.get("hide_subs_on_final") else 0)
-    n = build_ass(load_json(wd / "words.json")["words"], tl, plan, style, wd / "subs.ass", sub_end)
-    ovs = build_overlays(plan, style, tl, wd)
-    print(f"Субтитры: {n} фраз, графика: {len(ovs)} элементов. Финальная сборка…")
+    comp = Compositor(style["width"], style["height"], style["fps"])
+    splits = build_scenes(comp, plan, style, tl, tl.duration)
+    build_overlays(comp, plan, style, tl, tl.duration)
+    n = build_ass(load_json(wd / "words.json")["words"], tl, plan, style, wd / "subs.ass", sub_end, splits)
+    print(f"Субтитры: {n} фраз, графика: {len(comp.els)} элементов, сцен-панелей: {len(splits)}. Финальная сборка…")
 
     out = Path(args.out) if args.out else video.parent / f"{video.stem}_{'DRAFT' if args.draft else 'REELS'}.mp4"
-    final_pass(body, ovs, plan, style, tl.duration, wd, out.resolve(), args.draft)
+    final_pass(body, comp, splits, plan, style, tl.duration, wd, out.resolve(), args.draft)
     print(f"\nГОТОВО: {out}  ({tl.duration:.1f} c)")
 
 

@@ -4,18 +4,15 @@
   "width": 1080,
   "height": 1920,
   "fps": 30,
-
   "accent": "#E8622C",
   "text": "#FFFFFF",
   "outline": "#000000",
   "card_bg": "#FFFFFF",
   "card_text": "#1C1C1C",
-
   "font_heavy": "Inter-Black.otf",
   "font_bold": "Inter-ExtraBold.otf",
   "font_regular": "Inter-SemiBold.otf",
   "ass_font": "Inter Black",
-
   "sub_size": 78,
   "sub_y": 1180,
   "sub_max_words": 3,
@@ -23,20 +20,64 @@
   "sub_caps": false,
   "sub_outline": 6,
   "sub_shadow": 2,
-
   "header_y": 210,
   "header_size": 56,
   "card_y": 430,
   "cta_bar_y": 1420,
-
   "zoom_punch": 1.12,
   "zoom_anchor_y": 0.35,
   "cut_pad_before": 0.06,
   "cut_pad_after": 0.12,
   "max_pause": 0.45,
-
   "sfx_volume": 0.35,
-  "sfx": {"header": "whoosh.wav", "card": "pop.wav", "cta": "pop.wav", "bar": "click.wav"},
-  "music_volume": 0.10,
-  "loudness_lufs": -14
+  "sfx": {
+    "header": "whoosh.wav",
+    "card": "pop.wav",
+    "cta": "pop.wav",
+    "bar": "click.wav",
+    "pill": "pop.wav",
+    "title": "pop.wav",
+    "strike": "swish.wav",
+    "counter": "counter.wav",
+    "sticker": "pop.wav",
+    "scene": "whoosh.wav"
+  },
+  "music_volume": 0.1,
+  "loudness_lufs": -14,
+  "font_title": "Inter-Black.otf",
+  "font_body": "Inter-SemiBold.otf",
+  "font_pill": "Inter-ExtraBold.otf",
+  "ink": "#1C1C1C",
+  "muted": "#8A817A",
+  "placeholder": "#ECE6DF",
+  "panel_bg": "#F6F1EA",
+  "pill_bg": "#E8622C",
+  "pill_text": "#FFFFFF",
+  "pill_variant": "dark",
+  "strike": "#E8622C",
+  "bar_colors": [
+    "#E8622C",
+    "#1C1C1C"
+  ],
+  "title_size": 120,
+  "body_size": 54,
+  "pill_size": 52,
+  "flow_size": 54,
+  "header_kind": "pill",
+  "split_y": 960,
+  "split_crop_y": 180,
+  "panel_area": [
+    1110,
+    1640
+  ],
+  "overlay_area": [
+    330,
+    900
+  ],
+  "scene_gap": 30,
+  "sub_y_split": 1040,
+  "sub_size_split": 70,
+  "sub_split_color": "#1C1C1C",
+  "sub_italic": false,
+  "sub_active_highlight": true
 }

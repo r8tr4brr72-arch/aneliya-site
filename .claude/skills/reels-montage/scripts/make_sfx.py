@@ -54,7 +54,54 @@ def click() -> np.ndarray:
     return (rng.standard_normal(t.size) * 0.5 + np.sin(2 * np.pi * 2400 * t)) * np.exp(-t * 260)
 
 
+def soft_pop() -> np.ndarray:
+    t = np.arange(int(SR * 0.09)) / SR
+    freq = 520 + 380 * np.exp(-t * 60)
+    phase = 2 * np.pi * np.cumsum(freq) / SR
+    return np.sin(phase) * np.exp(-t * 55) * np.minimum(1, t * 1500) * 0.6
+
+
+def swish() -> np.ndarray:
+    n = int(SR * 0.22)
+    t = np.arange(n) / SR
+    noise = np.random.default_rng(11).standard_normal(n)
+    out = np.zeros(n)
+    cutoff = 1500 + 6000 * (t / t[-1])
+    a = np.exp(-2 * np.pi * cutoff / SR)
+    y = 0.0
+    for i in range(n):
+        y = a[i] * y + (1 - a[i]) * noise[i]
+        out[i] = y
+    return out * np.sin(np.pi * t / t[-1]) ** 2
+
+
+def ding() -> np.ndarray:
+    t = np.arange(int(SR * 0.9)) / SR
+    tone = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((1318, 1.0), (2637, 0.35), (3951, 0.12)))
+    return tone * np.exp(-t * 5) * np.minimum(1, t * 3000)
+
+
+def tick() -> np.ndarray:
+    t = np.arange(int(SR * 0.018)) / SR
+    return np.sin(2 * np.pi * 3200 * t) * np.exp(-t * 400)
+
+
+def counter() -> np.ndarray:
+    """~1.2 s of accelerating-then-slowing ticks, for count-up numbers."""
+    out = np.zeros(int(SR * 1.25))
+    tk = tick()
+    times = np.cumsum(np.linspace(0.035, 0.11, 18))
+    for tt in times[times < 1.2]:
+        i = int(tt * SR)
+        out[i:i + tk.size] += tk[: out.size - i]
+    return out
+
+
 if __name__ == "__main__":
+    write("soft_pop.wav", soft_pop())
+    write("swish.wav", swish())
+    write("ding.wav", ding())
+    write("counter.wav", counter())
     write("pop.wav", pop())
     write("whoosh.wav", whoosh())
     write("click.wav", click())

@@ -144,3 +144,159 @@ def cta_final(style: dict, title: str, keyword: str, subtitle: str):
         y += a + de + 8
     img = _shadowed(img)
     return img, (style["width"] - img.width) // 2, style["card_y"] - 44
+
+
+# ================================================================ scene primitives
+# Used by compositor.py for plan["scenes"]. All return bare RGBA images; layout is done there.
+
+EMOJI_FONT = FONTS_DIR / "NotoColorEmoji.ttf"
+
+
+def _rgba(h: str, a: int = 255):
+    return (*hex_rgb(h), a)
+
+
+def emoji(ch: str, size: int) -> Image.Image:
+    """Colour emoji rendered from Noto Color Emoji (bitmap font, native size 109)."""
+    ch = ch.replace("️", "")
+    key = ("emoji", ch, size)
+    if key in _cache:
+        return _cache[key].copy()
+    f = ImageFont.truetype(str(EMOJI_FONT), 109)
+    im = Image.new("RGBA", (360, 160), (0, 0, 0, 0))
+    ImageDraw.Draw(im).text((10, 10), ch, font=f, embedded_color=True)
+    bb = im.getbbox()
+    if not bb:
+        return Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    im = im.crop(bb)
+    im = im.resize((max(1, round(im.width * size / im.height)), size), Image.LANCZOS)
+    _cache[key] = im
+    return im.copy()
+
+
+def _text_img(text: str, f: ImageFont.FreeTypeFont, color, max_w: int | None = None, spacing: int = 6,
+              align: str = "center") -> Image.Image:
+    lines = wrap(text, f, max_w) if max_w else str(text).split("\n")
+    asc, desc = f.getmetrics()
+    lh = asc + desc
+    w = max(1, max(int(f.getlength(line)) for line in lines))
+    h = lh * len(lines) + spacing * (len(lines) - 1)
+    pad = 8  # italic overhang
+    im = Image.new("RGBA", (w + pad * 2, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for i, line in enumerate(lines):
+        lw = f.getlength(line)
+        x = pad + ((w - lw) / 2 if align == "center" else 0)
+        d.text((x, i * (lh + spacing)), line, font=f, fill=color)
+    return im
+
+
+def title(style: dict, text: str, size: int | None = None, color: str | None = None) -> Image.Image:
+    f = font(style, "title", size or style.get("title_size", 104))
+    return _text_img(text, f, _rgba(color or style["ink"]), max_w=940)
+
+
+def body_text(style: dict, text: str, size: int | None = None, color: str | None = None) -> Image.Image:
+    f = font(style, "body", size or style.get("body_size", 54))
+    return _text_img(text, f, _rgba(color or style["ink"]), max_w=940)
+
+
+def pill(style: dict, text: str, emo: str | None = None, variant: str = "dark", size: int | None = None) -> Image.Image:
+    """dark: emoji outside on the left + filled pill.  light: white rounded badge, emoji inside."""
+    fs = size or style.get("pill_size", 46)
+    f = font(style, "pill", fs)
+    a, de = f.getmetrics()
+    th = a + de
+    tw = int(f.getlength(text)) + 8
+    ph = th + 30
+    em = emoji(emo, int(fs * 1.15)) if emo else None
+    if variant == "light":
+        inner = (em.width + 18 if em else 0) + tw
+        badge = Image.new("RGBA", (inner + 64, ph + 12), (0, 0, 0, 0))
+        d = ImageDraw.Draw(badge)
+        d.rounded_rectangle([0, 0, badge.width - 1, badge.height - 1], radius=int(ph * 0.42),
+                            fill=_rgba(style.get("card_bg", "#FFFFFF")))
+        x = 32
+        if em:
+            badge.alpha_composite(em, (x, (badge.height - em.height) // 2))
+            x += em.width + 18
+        d.text((x, (badge.height - th) // 2), text, font=f, fill=_rgba(style["ink"]))
+        return _shadowed(badge, radius=14, offset=6, alpha=45)
+    body = Image.new("RGBA", (tw + 56, ph), (0, 0, 0, 0))
+    d = ImageDraw.Draw(body)
+    d.rounded_rectangle([0, 0, body.width - 1, ph - 1], radius=ph // 2, fill=_rgba(style["pill_bg"]))
+    d.text((28, (ph - th) // 2 - 2), text, font=f, fill=_rgba(style["pill_text"]))
+    if not em:
+        return body
+    out = Image.new("RGBA", (em.width + 16 + body.width, max(em.height, ph)), (0, 0, 0, 0))
+    out.alpha_composite(em, (0, (out.height - em.height) // 2))
+    out.alpha_composite(body, (em.width + 16, (out.height - ph) // 2))
+    return out
+
+
+def doc_card(style: dict, heading: str, sub: str = "", emo: str | None = None, lines: int = 3) -> Image.Image:
+    """White 'document / app' mockup card: emoji + heading, subheading, grey placeholder lines."""
+    W = 820
+    fh = font(style, "title", 52)
+    fs = font(style, "body", 40)
+    em = emoji(emo, 64) if emo else None
+    hx = 48 + (em.width + 20 if em else 0)
+    hl = wrap(heading, fh, W - hx - 48)
+    a, de = fh.getmetrics()
+    sa, sd = fs.getmetrics()
+    H = 44 + len(hl) * (a + de) + (14 + sa + sd if sub else 0) + 30 + lines * 40 + 30
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=36, fill=_rgba(style.get("card_bg", "#FFFFFF")))
+    y = 44
+    if em:
+        img.alpha_composite(em, (48, y))
+    for line in hl:
+        d.text((hx, y), line, font=fh, fill=_rgba(style["ink"]))
+        y += a + de
+    if sub:
+        y += 14
+        d.text((hx, y), sub, font=fs, fill=_rgba(style.get("muted", "#8A817A")))
+        y += sa + sd
+    y += 30
+    grey = _rgba(style.get("placeholder", "#E7E1DA"))
+    for i in range(lines):
+        w = int((W - 96) * (1.0, 0.82, 0.6, 0.9)[i % 4])
+        d.rounded_rectangle([48, y, 48 + w, y + 18], radius=9, fill=grey)
+        y += 40
+    return _shadowed(img, radius=18, offset=8, alpha=50)
+
+
+def arrow(style: dict, length: int = 70, color: str | None = None) -> Image.Image:
+    c = _rgba(color or style["ink"])
+    im = Image.new("RGBA", (length + 8, 40), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.line([(4, 20), (length - 6, 20)], fill=c, width=5)
+    d.polygon([(length + 4, 20), (length - 14, 8), (length - 14, 32)], fill=c)
+    return im
+
+
+def bar_rect(style: dict, w: int, h: int, color: str) -> Image.Image:
+    im = Image.new("RGBA", (w, max(h, 2)), (0, 0, 0, 0))
+    ImageDraw.Draw(im).rounded_rectangle([0, 0, w - 1, max(h, 2) - 1], radius=min(22, w // 4), fill=_rgba(color))
+    return im
+
+
+def line(style: dict, w: int, thickness: int = 8, color: str | None = None) -> Image.Image:
+    im = Image.new("RGBA", (w, thickness), (0, 0, 0, 0))
+    ImageDraw.Draw(im).rounded_rectangle([0, 0, w - 1, thickness - 1], radius=thickness // 2,
+                                         fill=_rgba(color or style["strike"]))
+    return im
+
+
+def serif_header(style: dict, text: str):
+    """Hook/header variant: big serif text with soft shadow, straight on the video."""
+    f = font(style, "title", style.get("header_size", 64))
+    im = _text_img(text, f, _rgba(style.get("header_text", "#FFFFFF")), max_w=920)
+    sh = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    sh.putalpha(im.split()[3].point(lambda v: int(v * 0.55)))
+    out = Image.new("RGBA", (im.width + 40, im.height + 40), (0, 0, 0, 0))
+    out.alpha_composite(sh, (20, 24))
+    out = out.filter(ImageFilter.GaussianBlur(8))
+    out.alpha_composite(im, (20, 20))
+    return out, (style["width"] - out.width) // 2, style["header_y"] - 40
