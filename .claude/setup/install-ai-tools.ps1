@@ -4,9 +4,10 @@
 #   powershell -ExecutionPolicy Bypass -File install-ai-tools.ps1 -Blender   # + Blender MCP (3D)
 #   powershell -ExecutionPolicy Bypass -File install-ai-tools.ps1 -Voice     # + Chatterbox (озвучка текста)
 #   powershell -ExecutionPolicy Bypass -File install-ai-tools.ps1 -ThreeD    # + img2threejs (3D-модель из фото)
-# Можно комбинировать: -Blender -Voice -ThreeD
+#   powershell -ExecutionPolicy Bypass -File install-ai-tools.ps1 -Animation # + скиллы анимации и рисования для видео
+# Можно комбинировать: -Blender -Voice -ThreeD -Animation
 
-param([switch]$Blender, [switch]$Voice, [switch]$ThreeD)
+param([switch]$Blender, [switch]$Voice, [switch]$ThreeD, [switch]$Animation)
 $ErrorActionPreference = "Stop"
 
 function Step($t) { Write-Host "`n=== $t ===" -ForegroundColor Cyan }
@@ -53,6 +54,39 @@ if ($Blender) {
     }
     uvx mcp-for-blender setup
     Write-Host "Откройте Blender: аддон сам запустит сервер (вкладка MCP for Blender, клавиша N в окне 3D)."
+}
+
+if ($Animation) {
+    $skills = Join-Path $env:USERPROFILE ".claude\skills"
+    New-Item -ItemType Directory -Force -Path $skills | Out-Null
+    $repoSkills = Join-Path (Split-Path $PSScriptRoot -Parent) "skills"
+
+    Step "Мои скиллы: video-director (режиссёр) и reels-montage (монтаж) -> $skills"
+    foreach ($n in "video-director", "reels-montage") {
+        Copy-Item -Path (Join-Path $repoSkills $n) -Destination $skills -Recurse -Force
+    }
+    python -m pip install -r (Join-Path $skills "reels-montage\requirements.txt")
+
+    Step "Claude Drawing — картина рисуется кодом, 83 стиля (укиё-э, тушь, акварель)"
+    $cd = Join-Path $skills "claude-drawing"
+    if (Test-Path $cd) { git -C $cd pull --ff-only } else { git clone --depth 1 https://github.com/cloveric/claude-drawing-skill.git $cd }
+    python -m pip install -r (Join-Path $cd "requirements.txt")
+
+    Step "Huashu Art Motion — живые картины и кинопереходы (36 стилей, документация на китайском)"
+    if (-not (Have uv)) { winget install -e --id astral-sh.uv --accept-package-agreements --accept-source-agreements }
+    npx --yes skills@latest add alchaincyf/huashu-art-motion -g -y -a claude-code
+    if (Have uv) { uv run --with playwright playwright install chromium }
+    else { Write-Host "uv только что установлен: перезапустите PowerShell и выполните: uv run --with playwright playwright install chromium" -ForegroundColor Yellow }
+
+    Step "Claude Animation Base — стартовый проект акварельных мультиков (p5.js + p5.brush)"
+    $cab = "C:\Claude\ClaudeAnimationBase"
+    if (-not (Test-Path $cab)) { git clone --depth 1 https://github.com/JohnHeibel/ClaudeAnimationBase.git $cab }
+    Push-Location $cab; npm install; Pop-Location
+
+    Step "Anidoodle — рисованные мультики, таймлапсы и надписи кистью"
+    Write-Host "Это плагин: внутри Claude Code выполните две команды:" -ForegroundColor Yellow
+    Write-Host "  /plugin marketplace add alexgreensh/anidoodle"
+    Write-Host "  /plugin install anidoodle@alexgreensh-anidoodle"
 }
 
 if ($Voice) {

@@ -1,0 +1,13 @@
+{
+  "out": "vopros.mp4",
+  "duration": 13.5,
+  "background": {"video": "drawing.mp4"},
+  "veil": {"mode": "top", "top_solid": 820, "fade_end": 1240, "alpha": 0.66},
+  "music": "generate",
+  "music_seed": 1,
+  "texts": [
+    {"kind": "label", "text": "Квиз · Игра «Гейша»", "y": 300, "at": 0.3},
+    {"kind": "body", "lines": ["С чем сравнивают", "идеал поведения", "гейши?"], "y": 410, "size": 62, "lh": 1.35, "at": 0.9},
+    {"kind": "label", "text": "Ответ — в следующей сторис", "y": 760, "size": 26, "track": 7, "line": false, "at": 2.2}
+  ]
+}

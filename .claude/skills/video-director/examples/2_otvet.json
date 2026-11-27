@@ -1,0 +1,13 @@
+{
+  "out": "otvet.mp4",
+  "duration": 12,
+  "background": {"video": "willow_drawing.mp4"},
+  "veil": {"mode": "top", "top_solid": 640, "fade_end": 1060, "alpha": 0.66},
+  "music": null,
+  "texts": [
+    {"kind": "label", "text": "Ответ", "y": 290, "at": 0.3, "track": 12},
+    {"kind": "title", "text": "Гибкая ива", "y": 380, "size": 118, "at": 0.8},
+    {"kind": "body", "text": "Гейша, как ива, гнётся под ветром, но не ломается: мягкая снаружи и сильная внутри.", "y": 600, "size": 44, "maxw": 860, "lh": 1.38, "at": 1.8},
+    {"kind": "label", "text": "Игра «Гейша»", "y": 830, "size": 26, "line": false, "at": 3.2}
+  ]
+}

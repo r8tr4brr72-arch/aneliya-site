@@ -1,0 +1,14 @@
+{
+  "out": "anons.mp4",
+  "duration": 10,
+  "background": {"image": "photo.jpg", "photo_offset": 380, "zoom": 0.06},
+  "veil": {"mode": "top", "top_solid": 560, "fade_end": 800, "alpha": 0.62},
+  "music": "generate",
+  "music_seed": 3,
+  "texts": [
+    {"kind": "label", "text": "Игра «Гейша» · Квиз", "y": 250, "at": 0.3},
+    {"kind": "title", "text": "Заглянем за кулисы мира гейш?", "y": 350, "size": 76, "maxw": 900, "lh": 1.25, "at": 0.8},
+    {"kind": "body", "text": "Сегодня новый вопрос — проверь себя", "y": 556, "size": 42, "at": 1.8},
+    {"kind": "label", "text": "Вопрос — в следующей сторис", "y": 640, "size": 24, "track": 7, "line": false, "at": 2.8}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "out": "opros.mp4",
+  "duration": 8,
+  "background": {"image": "art_final.png", "zoom": 0.04},
+  "veil": {"mode": "full", "alpha": 0.45},
+  "music": null,
+  "texts": [
+    {"kind": "label", "text": "Квиз · Игра «Гейша»", "y": 420, "at": 0.2},
+    {"kind": "title", "text": "Удалось угадать?", "y": 530, "size": 104, "at": 0.6},
+    {"kind": "body", "text": "Отметь в опросе — посмотрим, сколько нас знало ответ", "y": 690, "size": 42, "maxw": 820, "at": 1.4}
+  ]
+}
