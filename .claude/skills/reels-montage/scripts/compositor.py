@@ -317,7 +317,7 @@ def build_scenes(comp: Compositor, plan: dict, style: dict, tl: Timeline, video_
 
 
 # ====================================================================== classic overlays
-def build_overlays(comp: Compositor, plan: dict, style: dict, tl: Timeline, video_end: float):
+def build_overlays(comp: Compositor, plan: dict, style: dict, tl: Timeline, video_end: float, env=None):
     cta = plan.get("cta") or {}
     final_s = video_end - float(cta.get("final_seconds", 0) or 0) if cta.get("keyword") else video_end
     final_s = max(final_s, 0.0)
@@ -327,6 +327,20 @@ def build_overlays(comp: Compositor, plan: dict, style: dict, tl: Timeline, vide
         img, x, y = img_xy
         comp.add(Element(img, x, y, max(0.0, start), min(end, video_end), anim, sfx=sfx.get(kind), z=z,
                          hold_to_end=end >= video_end - 0.01))
+
+    veil = plan.get("veil")
+    if veil:   # full-frame tint (brand "Вариант А" for text-first videos)
+        im = Image.new("RGBA", (style["width"], style["height"]), (*g.hex_rgb(veil.get("color", "#3A2A20")), int(255 * float(veil.get("alpha", 0.5)))))
+        comp.add(Element(im, 0, 0, 0.0, video_end, "none", z=1, hold_to_end=True))
+    ag = plan.get("audiogram")
+    if ag and env is not None:
+        fps = comp.fps
+        pill = g.audiogram_base(style, ag.get("label", ""))
+
+        def draw(lt, env=env, pill=pill, fps=fps):
+            return g.audiogram_frame(style, pill, env, int(lt * fps))
+        comp.add(Element(None, (style["width"] - pill.width) // 2, int(ag.get("y", 640)), 0.0, video_end, "fade",
+                         z=15, dynamic=draw, dyn_dur=1e9, hold_to_end=True))
 
     scrim = style.get("sub_scrim")
     if scrim:   # soft cinematic gradient under the subtitles, so thin serif text reads on any footage

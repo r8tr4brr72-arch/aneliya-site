@@ -195,6 +195,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return len(chunks)
 
 
+def audio_envelope(body: Path, fps: int):
+    """Loudness per video frame (0..1) of the edited voice, for the animated waveform."""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(body), "-vn", "-ac", "1", "-ar", "8000", "-f", "s16le", "-"],
+                         capture_output=True).stdout
+    x = np.frombuffer(raw, dtype="<i2").astype(np.float32) / 32768
+    hop = 8000 // fps
+    n = len(x) // hop
+    if n == 0:
+        return np.zeros(1)
+    rms = np.sqrt((x[: n * hop].reshape(n, hop) ** 2).mean(axis=1))
+    return np.clip(rms / (np.percentile(rms, 95) + 1e-6), 0, 1)
+
+
 # ---------------------------------------------------------------- 3. sound effects track
 def build_sfx_track(events: list[tuple[float, str]], dur: float, volume: float, path: Path) -> bool:
     sr = 48000
@@ -235,13 +248,26 @@ def final_pass(body: Path, comp: Compositor, splits, plan: dict, style: dict, du
               "-i", "pipe:0"]
     n_in = 2
     fg = []
+    src = "[0:v]"
+    bgv = plan.get("background")
+    if bgv and bgv.get("video"):
+        bp = Path(bgv["video"])
+        if not bp.is_absolute():
+            bp = (Path(plan["video"]).parent / bp).resolve()
+        if not bp.exists():
+            die(f"фоновое видео не найдено: {bp}")
+        inputs += ["-stream_loop", "-1", "-i", str(bp)]
+        blur = f",gblur=sigma={int(bgv['blur'])}" if bgv.get("blur") else ""
+        fg.append(f"[{n_in}:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
+                  f"fps={fps},setpts=PTS-STARTPTS{blur}[bgsrc]")
+        src, n_in = "[bgsrc]", n_in + 1
     if splits:
         en = "+".join(f"between(t,{a:.3f},{b - 0.001:.3f})" for a, b in splits)
-        fg.append("[0:v]split=2[va][vb]")
+        fg.append(f"{src}split=2[va][vb]")
         fg.append(f"[vb]crop={W}:{style['split_y']}:0:{style['split_crop_y']}[vtop]")
         fg.append(f"[va][vtop]overlay=0:0:enable='{en}'[base]")
     else:
-        fg.append("[0:v]null[base]")
+        fg.append(f"{src}null[base]")
     # privacy: blur (or cover) rectangles from plan["blur"], in output-frame pixels (1080x1920)
     cur = "[base]"
     for i, r in enumerate(plan.get("blur", [])):
@@ -344,7 +370,8 @@ def main():
     sub_end = tl.duration - (float(cta.get("final_seconds", 0) or 0) if cta.get("keyword") and cta.get("hide_subs_on_final", style.get("hide_subs_on_final")) else 0)
     comp = Compositor(style["width"], style["height"], style["fps"])
     splits = build_scenes(comp, plan, style, tl, tl.duration)
-    build_overlays(comp, plan, style, tl, tl.duration)
+    env = audio_envelope(body, style["fps"]) if plan.get("audiogram") else None
+    build_overlays(comp, plan, style, tl, tl.duration, env)
     n = build_ass(load_json(wd / "words.json")["words"], tl, plan, style, wd / "subs.ass", sub_end, splits)
     print(f"Субтитры: {n} фраз, графика: {len(comp.els)} элементов, сцен-панелей: {len(splits)}. Финальная сборка…")
 

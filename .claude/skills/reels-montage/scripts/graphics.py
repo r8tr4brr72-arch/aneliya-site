@@ -399,3 +399,38 @@ def cta_final_min(style: dict, title: str, keyword: str, subtitle: str):
         d.text(((W - fs.getlength(line)) / 2, y), line, font=fs, fill=_rgba(style["text"], 235))
         y += 56
     return im, (style["width"] - W) // 2, style.get("cta_y", style["card_y"])
+
+
+# ================================================================ audiogram (voice message pill)
+AG_W, AG_H, AG_BARS = 760, 132, 34
+
+
+def audiogram_base(style: dict, label: str = "") -> Image.Image:
+    """Static part: translucent pill, play mark, optional caps label above."""
+    top = 46 if label else 0
+    im = Image.new("RGBA", (AG_W, AG_H + top), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    if label:
+        _spaced(d, AG_W / 2, 0, label.upper(), font(style, "label", 22), _rgba(style["text"], 200), 7)
+    d.rounded_rectangle([0, top, AG_W - 1, top + AG_H - 1], radius=AG_H // 2, fill=_rgba(style["accent"], 225))
+    cx, cy = 66, top + AG_H // 2
+    d.ellipse([cx - 34, cy - 34, cx + 34, cy + 34], fill=_rgba(style["text"], 240))
+    d.polygon([(cx - 9, cy - 15), (cx - 9, cy + 15), (cx + 16, cy)], fill=_rgba(style["accent"]))
+    return im
+
+
+def audiogram_frame(style: dict, base: Image.Image, env, frame: int) -> Image.Image:
+    """Bars follow the voice: the newest loudness enters on the right and scrolls left."""
+    im = base.copy()
+    d = ImageDraw.Draw(im)
+    top = im.height - AG_H
+    x0, x1 = 128, AG_W - 44
+    step = (x1 - x0) / AG_BARS
+    col = _rgba(style["text"], 235)
+    for k in range(AG_BARS):
+        i = frame - (AG_BARS - 1 - k) * 2
+        v = float(env[i]) if 0 <= i < len(env) else 0.0
+        h = 8 + v * (AG_H - 52)
+        x = x0 + k * step + step / 2
+        d.rounded_rectangle([x - 4, top + AG_H / 2 - h / 2, x + 4, top + AG_H / 2 + h / 2], radius=4, fill=col)
+    return im
