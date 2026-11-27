@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сямисэн — акварель кодом</title>
+<!-- p5.brush (standalone build): https://github.com/acamposuribe/p5.brush, MIT -->
+<script src="https://cdn.jsdelivr.net/npm/p5.brush@3.3.0/dist/brush.js"></script>
+<style>
+  html, body { margin: 0; background: #1b1412; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { max-height: 100vh; max-width: 100vw; height: auto !important; width: auto !important; }
+</style>
+</head>
+<body>
+<script>
+/*
+  Вертикальная акварель 1080×1920: сямисэн и медиатор-бати на фоне бордового солнца.
+  ?stage=N — только первые N слоёв (для видео «картина рисуется»).
+*/
+const W = 1080, H = 1920;
+const q = new URLSearchParams(location.search);
+const SEED = +(q.get("seed") || 3);
+const STAGE = q.has("stage") ? +q.get("stage") : 99;
+
+const PAPER = "#f2eadf", INK = "#1d1514", WINE = "#5a0f12", WINE2 = "#9b1d1a",
+      PINK = "#d98c99", GOLD = "#b58a3c", IVORY = "#efe4cc", WOOD = "#3a1a14", MIST = "#8d8f9c";
+
+brush.createCanvas(W, H, { parent: document.body, pixelDensity: 1 });
+brush.scaleBrushes(4.2);
+brush.angleMode(brush.DEGREES);
+
+let _s = 1;
+const rnd = (a = 1, b) => { _s = (_s * 16807) % 2147483647; const r = (_s - 1) / 2147483646;
+  return b === undefined ? r * a : a + r * (b - a); };
+const reseed = k => { _s = (SEED * 9973 + k * 7919) % 2147483647 || 1; brush.seed(SEED * 1000 + k); };
+
+// the instrument is drawn upright in local coordinates (origin = body centre), then tilted
+const BODY = [430, 1470], TILT = 24;
+const inShamisen = fn => { brush.push(); brush.translate(BODY[0], BODY[1]); brush.rotate(TILT); fn(); brush.pop(); };
+
+const layers = [
+  // 1. paper wash
+  () => { brush.noStroke(); brush.fill("#e8dccb", 70); brush.fillBleed(0.3); brush.fillTexture(0.6, 0.1);
+          brush.rect(-40, -40, W + 80, H + 80); },
+  // 2. wine sun behind the head of the instrument
+  () => { brush.noStroke(); brush.fill(WINE2, 185); brush.fillBleed(0.18, "out"); brush.fillTexture(0.55, 0.55);
+          brush.circle(790, 640, 210, 0.25); },
+  // 3. mist at the bottom
+  () => { brush.noStroke(); brush.fill(MIST, 75); brush.fillBleed(0.35); brush.fillTexture(0.4, 0.2);
+          brush.polygon([[-60, 1560], [220, 1470], [480, 1540], [760, 1450], [1140, 1530], [1140, 1980], [-60, 1980]]); },
+  // 4. wooden frame of the body (dō)
+  () => inShamisen(() => { brush.noStroke(); brush.fill(WOOD, 220); brush.fillBleed(0.08); brush.fillTexture(0.5, 0.6);
+          brush.rect(0, 0, 300, 340, "center"); }),
+  // 5. skin of the body
+  () => inShamisen(() => { brush.noStroke(); brush.fill(IVORY, 235); brush.fillBleed(0.06); brush.fillTexture(0.25, 0.35);
+          brush.rect(0, 4, 246, 286, "center"); }),
+  // 6. neck (sao) and head (tenjin) — crisp lacquered wood
+  () => inShamisen(() => { brush.noStroke(); brush.wash(WOOD, 255);
+          brush.polygon([[-12, -168], [12, -168], [10, -905], [-10, -905]]);
+          brush.polygon([[-13, -905], [13, -905], [24, -1015], [-2, -1025]]);
+          brush.noWash(); }),
+  // 7. pegs, bridge and three strings
+  () => inShamisen(() => { brush.noFill();
+          brush.set("2B", WOOD, 0.9);
+          [-940, -968, -996].forEach((y, i) => brush.line(-40 + i * 3, y, 44 + i * 3, y - 5));
+          brush.noStroke(); brush.wash(IVORY, 255);
+          [-940, -968, -996].forEach((y, i) => { brush.circle(-42 + i * 3, y, 7, 0.1); brush.circle(46 + i * 3, y - 5, 7, 0.1); });
+          brush.rect(0, 108, 50, 12, "center"); brush.noWash();
+          brush.set("pen", INK, 0.75);
+          [-8, 0, 8].forEach(x => brush.line(x, 150, x * 0.6, -903)); }),
+  // 8. bachi — ginkgo-shaped plectrum, ivory with a wooden handle
+  () => { brush.push(); brush.translate(790, 1640); brush.rotate(-34);
+          const blade = [[-11, -190], [11, -190], [17, -55], [112, 70], [-112, 70], [-17, -55]];
+          brush.noStroke(); brush.fill(IVORY, 250); brush.fillBleed(0.04); brush.fillTexture(0.25, 0.7);
+          brush.polygon(blade);
+          brush.wash(WOOD, 255); brush.polygon([[-12, -260], [12, -260], [11, -190], [-11, -190]]); brush.noWash();
+          brush.noFill(); brush.set("HB", WOOD, 0.7); brush.spline(blade.concat([blade[0]]), 0);
+          brush.set("marker", GOLD, 0.6); brush.line(-112, 70, 112, 70);
+          brush.pop(); },
+  // 9. falling petals
+  () => { brush.noStroke(); brush.fillBleed(0.2); brush.fillTexture(0.2, 0.5);
+          for (let i = 0; i < 22; i++) { const x = rnd(60, 1020), y = rnd(980, 1860);
+            brush.fill(i % 4 ? PINK : WINE2, 160); brush.circle(x, y, rnd(7, 14), 0.7); } },
+];
+
+brush.clear(PAPER);
+brush.push();
+brush.translate(-W / 2, -H / 2);
+// each layer dries (render) before the next, like real paper — earlier layers never change
+layers.slice(0, STAGE).forEach((draw, i) => { reseed(10 + i); draw(); brush.render(); });
+brush.pop();
+brush.render();
+window.__done = true;
+</script>
+</body>
+</html>
