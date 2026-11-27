@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ива — акварель кодом</title>
+<!-- p5.brush (standalone build): https://github.com/acamposuribe/p5.brush, MIT -->
+<script src="https://cdn.jsdelivr.net/npm/p5.brush@3.3.0/dist/brush.js"></script>
+<style>
+  html, body { margin: 0; background: #1b1412; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { max-height: 100vh; max-width: 100vw; height: auto !important; width: auto !important; }
+</style>
+</head>
+<body>
+<script>
+/*
+  Вертикальная акварель 1080×1920: плакучая ива над водой — «мир цветов и ив» (карюкай).
+  ?stage=N — только первые N слоёв (для видео «картина рисуется»).
+*/
+const W = 1080, H = 1920;
+const q = new URLSearchParams(location.search);
+const SEED = +(q.get("seed") || 5);
+const STAGE = q.has("stage") ? +q.get("stage") : 99;
+
+const PAPER = "#f2eadf", INK = "#1d1514", WINE = "#5a0f12", WINE2 = "#9b1d1a",
+      PINK = "#d98c99", GOLD = "#b58a3c", IVORY = "#efe4cc", WOOD = "#3a1a14", MIST = "#8d8f9c",
+      SAGE = "#7c8a5c", SAGE2 = "#a7b27f", MOSS = "#56623e";
+
+brush.createCanvas(W, H, { parent: document.body, pixelDensity: 1 });
+brush.scaleBrushes(4.2);
+brush.angleMode(brush.DEGREES);
+
+let _s = 1;
+const rnd = (a = 1, b) => { _s = (_s * 16807) % 2147483647; const r = (_s - 1) / 2147483646;
+  return b === undefined ? r * a : a + r * (b - a); };
+const reseed = k => { _s = (SEED * 9973 + k * 7919) % 2147483647 || 1; brush.seed(SEED * 1000 + k); };
+
+// willow geometry, computed once so every stage redraws the same tree
+reseed(1);
+const trunk = [[150, 1990, 1.6], [170, 1700, 1.5], [150, 1450, 1.4], [200, 1200, 1.2], [260, 1000, 1.0], [300, 860, 0.8]];
+const boughs = [
+  [[300, 860, 1], [430, 760, 0.9], [600, 700, 0.7], [800, 690, 0.5], [960, 730, 0.3]],
+  [[250, 1000, 0.9], [380, 920, 0.7], [520, 900, 0.5], [660, 930, 0.3]],
+  [[300, 860, 0.8], [330, 720, 0.6], [420, 600, 0.4], [540, 540, 0.2]],
+];
+const strands = [];
+boughs.forEach(b => { for (let i = 1; i < b.length; i++) {
+  const [x0, y0] = b[i - 1], [x1, y1] = b[i];
+  for (let k = 0; k < 6; k++) { const t = rnd(), x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t;
+    const len = rnd(380, 820), sway = rnd(-40, 40);
+    strands.push([[x, y, 0.8], [x + sway * 0.3, y + len * 0.35, 0.7], [x + sway * 0.8, y + len * 0.7, 0.5], [x + sway, y + len, 0.2]]); } } });
+const at = (s, t) => { // point at fraction t along a 4-point strand
+  const seg = Math.min(2, Math.floor(t * 3)), u = t * 3 - seg, a = s[seg], b = s[seg + 1];
+  return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]; };
+
+const layers = [
+  // 1. paper wash
+  () => { brush.noStroke(); brush.fill("#e8dccb", 70); brush.fillBleed(0.3); brush.fillTexture(0.6, 0.1);
+          brush.rect(-40, -40, W + 80, H + 80); },
+  // 2. wine sun
+  () => { brush.noStroke(); brush.fill(WINE2, 175); brush.fillBleed(0.18, "out"); brush.fillTexture(0.55, 0.55);
+          brush.circle(720, 640, 220, 0.25); },
+  // 3. still water with the sun's reflection
+  () => { brush.noStroke(); brush.fill(MIST, 70); brush.fillBleed(0.3); brush.fillTexture(0.4, 0.2);
+          brush.polygon([[-60, 1560], [1140, 1540], [1140, 1990], [-60, 1990]]);
+          },
+  // 4. trunk and boughs in ink
+  () => { brush.noFill(); brush.set("charcoal", INK, 2.6); brush.spline(trunk, 0.5);
+          brush.set("charcoal", INK, 1.6); boughs.forEach(b => brush.spline(b, 0.5));
+          brush.set("2B", INK, 1.0); brush.spline(trunk.map(([x, y, p]) => [x + 14, y, p * 0.6]), 0.5); },
+  // 5. hanging strands
+  () => { brush.noFill(); brush.set("HB", MOSS, 0.6); strands.forEach(s => brush.spline(s, 0.6)); },
+  // 6. leaves, first green
+  () => { brush.noFill(); brush.set("HB", SAGE, 1.1);
+          strands.forEach(s => { for (let k = 0; k < 9; k++) { const t = 0.08 + k * 0.1 + rnd(0, 0.04); const [x, y] = at(s, Math.min(t, 0.98));
+            const d = k % 2 ? 1 : -1; brush.line(x, y, x + d * rnd(10, 18), y + rnd(18, 30)); } }); },
+  // 7. leaves, second green
+  () => { brush.noFill(); brush.set("HB", SAGE2, 1.0);
+          strands.forEach(s => { for (let k = 0; k < 7; k++) { const t = 0.12 + k * 0.12 + rnd(0, 0.05); const [x, y] = at(s, Math.min(t, 0.98));
+            const d = k % 2 ? -1 : 1; brush.line(x, y, x + d * rnd(8, 15), y + rnd(16, 26)); } }); },
+  // 8. flowers and drifting petals — the "flowers" of the flower-and-willow world
+  () => { brush.noStroke(); brush.fillBleed(0.2); brush.fillTexture(0.25, 0.55);
+          for (let i = 0; i < 24; i++) { const x = rnd(380, 1040), y = rnd(900, 1880);
+            brush.fill(i % 4 ? PINK : WINE2, 165); brush.circle(x, y, rnd(7, 15), 0.7); } },
+];
+
+brush.clear(PAPER);
+brush.push();
+brush.translate(-W / 2, -H / 2);
+// each layer dries (render) before the next, like real paper — earlier layers never change
+layers.slice(0, STAGE).forEach((draw, i) => { reseed(10 + i); draw(); brush.render(); });
+brush.pop();
+brush.render();
+window.__done = true;
+</script>
+</body>
+</html>
