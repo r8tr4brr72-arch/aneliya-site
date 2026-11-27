@@ -328,15 +328,29 @@ def build_overlays(comp: Compositor, plan: dict, style: dict, tl: Timeline, vide
         comp.add(Element(img, x, y, max(0.0, start), min(end, video_end), anim, sfx=sfx.get(kind), z=z,
                          hold_to_end=end >= video_end - 0.01))
 
+    scrim = style.get("sub_scrim")
+    if scrim:   # soft cinematic gradient under the subtitles, so thin serif text reads on any footage
+        y0, y1, a = int(scrim.get("from", 1120)), int(scrim.get("full", 1460)), float(scrim.get("alpha", 0.5))
+        col = g.hex_rgb(scrim.get("color", "#1A0F0C"))
+        im = Image.new("RGBA", (style["width"], style["height"] - y0), (0, 0, 0, 0))
+        for y in range(im.height):
+            t = min(1.0, y / max(1, y1 - y0))
+            im.paste((*col, int(255 * a * t * t * (3 - 2 * t))), (0, y, im.width, y + 1))
+        comp.add(Element(im, 0, y0, 0.0, video_end, "none", z=2, hold_to_end=True))
+
     heads = sorted(plan.get("headers", []), key=lambda h: h["at"])
-    hdr = g.serif_header if style.get("header_kind") == "serif" else g.header
+    hdr = {"serif": g.serif_header, "caps": g.header_caps}.get(style.get("header_kind"), g.header)
+    minimal = style.get("graphics") == "minimal"
+    card_fn = g.card_min if minimal else g.card
+    bar_fn = g.cta_bar_min if minimal else g.cta_bar
+    final_fn = g.cta_final_min if minimal else g.cta_final
     for i, h in enumerate(heads):
         s = tl.map(h["at"])
         e = s + float(h["dur"]) if h.get("dur") else (tl.map(heads[i + 1]["at"]) if i + 1 < len(heads) else final_s)
         add(hdr(style, h["text"]), s, min(e, final_s), "header", "slide")
     for c in plan.get("cards", []):
         s = tl.map(c["at"])
-        add(g.card(style, c.get("title", ""), c.get("text", "")), s, min(s + float(c.get("dur", 2.5)), final_s), "card")
+        add(card_fn(style, c.get("title", ""), c.get("text", "")), s, min(s + float(c.get("dur", 2.5)), final_s), "card")
     for st in plan.get("stickers", []):
         s = tl.map(st["at"])
         im = g.emoji(st["emoji"], int(st.get("size", 140)))
@@ -345,7 +359,7 @@ def build_overlays(comp: Compositor, plan: dict, style: dict, tl: Timeline, vide
         add((im, x, y), s, min(s + float(st.get("dur", 1.6)), video_end), "sticker", z=25)
     if cta.get("keyword"):
         if cta.get("bar_text"):
-            add(g.cta_bar(style, cta["bar_text"]), float(cta.get("bar_from", 3.0)), final_s, "bar", "slide")
+            add(bar_fn(style, cta["bar_text"]), float(cta.get("bar_from", 3.0)), final_s, "bar", "slide")
         if final_s < video_end:
-            add(g.cta_final(style, cta.get("title", ""), cta["keyword"], cta.get("subtitle", "")),
+            add(final_fn(style, cta.get("title", ""), cta["keyword"], cta.get("subtitle", "")),
                 final_s, video_end, "cta", z=30)

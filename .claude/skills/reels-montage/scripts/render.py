@@ -138,7 +138,7 @@ def build_ass(words: list[dict], tl: Timeline, plan: dict, style: dict, path: Pa
     def in_split(t):
         return any(a <= t < b for a, b in splits)
 
-    acc = ass_color(style["accent"])
+    acc = ass_color(style.get("sub_key_color", style["accent"]))
     caps = style.get("sub_caps")
     karaoke = style.get("sub_active_highlight", True)
     x = style["width"] // 2
@@ -185,7 +185,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sub,{style['ass_font']},{style['sub_size']},{white},{white},{ass_color(style['outline'])},{ass_color('#000000', 0x80)},0,{it},0,0,100,100,0,0,1,{style['sub_outline']},{style['sub_shadow']},5,70,70,0,1
+Style: Sub,{style['ass_font']},{style['sub_size']},{white},{white},{ass_color(style['outline'], int(style.get('outline_alpha', 0)))},{ass_color('#000000', int(style.get('shadow_alpha', 0x80)))},0,{it},0,0,100,100,0,0,1,{style['sub_outline']},{style['sub_shadow']},5,70,70,0,1
 Style: SubSplit,{style['ass_font']},{style.get('sub_size_split', style['sub_size'])},{ass_color(style['sub_split_color'])},{white},{ass_color(style['panel_bg'])},{ass_color('#000000', 0xFF)},0,{it},0,0,100,100,0,0,1,0,0,5,70,70,0,1
 
 [Events]
@@ -256,7 +256,7 @@ def final_pass(body: Path, comp: Compositor, splits, plan: dict, style: dict, du
     if music:
         mp = Path(music)
         if not mp.is_absolute():
-            mp = Path(plan["video"]).parent / mp
+            mp = (Path(plan["video"]).parent / mp).resolve()
         if not mp.exists():
             die(f"музыка не найдена: {mp}")
         inputs += ["-stream_loop", "-1", "-i", str(mp)]
@@ -310,7 +310,8 @@ def main():
         if not (wd / f).exists():
             die(f"нет {f} в {wd}")
     plan = load_json(wd / "plan.json")
-    plan.setdefault("video", str(video))
+    if not plan.get("video"):
+        plan["video"] = str(video)
     style = load_style(plan.get("style"))
     info = probe(video)
     keep = validate(plan, info, style["fps"])
@@ -325,7 +326,7 @@ def main():
 
     body = render_segments(video, keep, style, wd, args.draft, info["has_audio"])
     cta = plan.get("cta") or {}
-    sub_end = tl.duration - (float(cta.get("final_seconds", 0) or 0) if cta.get("keyword") and cta.get("hide_subs_on_final") else 0)
+    sub_end = tl.duration - (float(cta.get("final_seconds", 0) or 0) if cta.get("keyword") and cta.get("hide_subs_on_final", style.get("hide_subs_on_final")) else 0)
     comp = Compositor(style["width"], style["height"], style["fps"])
     splits = build_scenes(comp, plan, style, tl, tl.duration)
     build_overlays(comp, plan, style, tl, tl.duration)

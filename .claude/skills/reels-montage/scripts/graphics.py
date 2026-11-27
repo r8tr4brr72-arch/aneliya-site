@@ -300,3 +300,102 @@ def serif_header(style: dict, text: str):
     out = out.filter(ImageFilter.GaussianBlur(8))
     out.alpha_composite(im, (20, 20))
     return out, (style["width"] - out.width) // 2, style["header_y"] - 40
+
+
+# ================================================================ minimal brand variants
+# Quiet, editorial look: spaced caps labels, thin rules, serif italic, translucent brand panels.
+
+def _spaced(d, cx, y, text, f, fill, track):
+    widths = [f.getlength(c) for c in text]
+    x = cx - (sum(widths) + track * (len(text) - 1)) / 2
+    for c, w in zip(text, widths):
+        d.text((x, y), c, font=f, fill=fill)
+        x += w + track
+
+
+def _soft_shadow(im: Image.Image, blur: int = 10, alpha: float = 0.55) -> Image.Image:
+    sh = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    sh.putalpha(im.split()[3].point(lambda v: int(v * alpha)))
+    pad = blur * 3
+    out = Image.new("RGBA", (im.width + pad * 2, im.height + pad * 2), (0, 0, 0, 0))
+    out.alpha_composite(sh, (pad, pad + 3))
+    out = out.filter(ImageFilter.GaussianBlur(blur))
+    out.alpha_composite(im, (pad, pad))
+    return out
+
+
+def header_caps(style: dict, text: str):
+    """Small spaced capitals + thin rule, cream, on the video (no plate)."""
+    f = font(style, "label", style.get("header_size", 30))
+    cream = _rgba(style["text"], 235)
+    t = text.upper()
+    w = int(sum(f.getlength(c) for c in t) + 9 * (len(t) - 1)) + 40
+    im = Image.new("RGBA", (min(w, 1000), 90), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    _spaced(d, im.width / 2, 8, t, f, cream, 9)
+    d.line([(im.width / 2 - 50, 66), (im.width / 2 + 50, 66)], fill=cream, width=2)
+    im = _soft_shadow(im)
+    return im, (style["width"] - im.width) // 2, style["header_y"] - 30
+
+
+def card_min(style: dict, title: str, text: str = ""):
+    """Translucent brand-colour panel, cream serif text, no shadow."""
+    W = 880
+    ft = font(style, "title", 60)
+    fb = font(style, "body", 42)
+    tl = wrap(title, ft, W - 120)
+    bl = wrap(text, fb, W - 120) if text else []
+    a, de = ft.getmetrics()
+    ba, bd = fb.getmetrics()
+    H = 56 + len(tl) * (a + de) + (24 + len(bl) * (ba + bd + 6) if bl else 0) + 56
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=22, fill=_rgba(style["accent"], 215))
+    y = 56
+    for line in tl:
+        d.text(((W - ft.getlength(line)) / 2, y), line, font=ft, fill=_rgba(style["text"]))
+        y += a + de
+    if bl:
+        y += 24
+        d.line([(W / 2 - 40, y - 12), (W / 2 + 40, y - 12)], fill=_rgba(style["text"], 160), width=2)
+        for line in bl:
+            d.text(((W - fb.getlength(line)) / 2, y), line, font=fb, fill=_rgba(style["text"], 235))
+            y += ba + bd + 6
+    return im, (style["width"] - W) // 2, style["card_y"]
+
+
+def cta_bar_min(style: dict, text: str):
+    """One line of spaced caps near the bottom, cream with a soft shadow — no pill."""
+    f = font(style, "label", 26)
+    t = text.upper()
+    w = int(sum(f.getlength(c) for c in t) + 6 * (len(t) - 1)) + 40
+    im = Image.new("RGBA", (min(w, 1040), 60), (0, 0, 0, 0))
+    _spaced(ImageDraw.Draw(im), im.width / 2, 12, t, f, _rgba(style["text"], 230), 6)
+    im = _soft_shadow(im, blur=8, alpha=0.7)
+    return im, (style["width"] - im.width) // 2, style["cta_bar_y"]
+
+
+def cta_final_min(style: dict, title: str, keyword: str, subtitle: str):
+    """Quiet closing card: caps label, keyword in serif italic, thin rules, translucent brand panel."""
+    W = 860
+    fl = font(style, "label", 28)
+    fk = font(style, "title", 132)
+    fs = font(style, "body", 40)
+    ka, kd = fk.getmetrics()
+    sl = wrap(subtitle, fs, W - 120) if subtitle else []
+    H = 70 + 40 + 30 + ka + kd + 30 + len(sl) * 56 + 70
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=26, fill=_rgba(style["accent"], 225))
+    cream = _rgba(style["text"])
+    y = 70
+    _spaced(d, W / 2, y, title.upper(), fl, _rgba(style["text"], 200), 9)
+    y += 40 + 30
+    d.text(((W - fk.getlength(keyword)) / 2, y), keyword, font=fk, fill=cream)
+    y += ka + kd + 10
+    d.line([(W / 2 - 60, y), (W / 2 + 60, y)], fill=_rgba(style["text"], 170), width=2)
+    y += 26
+    for line in sl:
+        d.text(((W - fs.getlength(line)) / 2, y), line, font=fs, fill=_rgba(style["text"], 235))
+        y += 56
+    return im, (style["width"] - W) // 2, style.get("cta_y", style["card_y"])

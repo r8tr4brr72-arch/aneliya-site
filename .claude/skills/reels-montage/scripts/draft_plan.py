@@ -22,7 +22,8 @@ def norm(w: str) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
-    ap.add_argument("--style", default="orange")
+    ap.add_argument("--style", default="terra",
+                    help="terra (коучинг, Лила, всё кроме Гейши) | geisha (линия Гейша) | beige | orange")
     ap.add_argument("--keyword", default="САЙТ", help="кодовое слово для воронки в комментариях")
     ap.add_argument("--force", action="store_true", help="перезаписать существующий plan.json")
     args = ap.parse_args()
