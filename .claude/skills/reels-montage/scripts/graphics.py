@@ -350,7 +350,7 @@ def card_min(style: dict, title: str, text: str = ""):
     H = 56 + len(tl) * (a + de) + (24 + len(bl) * (ba + bd + 6) if bl else 0) + 56
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=22, fill=_rgba(style["accent"], 215))
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=22, fill=_rgba(style["accent"], 242))
     y = 56
     for line in tl:
         d.text(((W - ft.getlength(line)) / 2, y), line, font=ft, fill=_rgba(style["text"]))
@@ -386,7 +386,7 @@ def cta_final_min(style: dict, title: str, keyword: str, subtitle: str):
     H = 70 + 40 + 30 + ka + kd + 30 + len(sl) * 56 + 70
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=26, fill=_rgba(style["accent"], 225))
+    d.rounded_rectangle([0, 0, W - 1, H - 1], radius=26, fill=_rgba(style["accent"], 245))
     cream = _rgba(style["text"])
     y = 70
     _spaced(d, W / 2, y, title.upper(), fl, _rgba(style["text"], 200), 9)

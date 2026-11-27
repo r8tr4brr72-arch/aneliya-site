@@ -242,7 +242,22 @@ def final_pass(body: Path, comp: Compositor, splits, plan: dict, style: dict, du
         fg.append(f"[va][vtop]overlay=0:0:enable='{en}'[base]")
     else:
         fg.append("[0:v]null[base]")
-    fg.append("[base][1:v]overlay=0:0:format=auto[gfx]")
+    # privacy: blur (or cover) rectangles from plan["blur"], in output-frame pixels (1080x1920)
+    cur = "[base]"
+    for i, r in enumerate(plan.get("blur", [])):
+        x, y, w, h = (int(r[k]) for k in ("x", "y", "w", "h"))
+        w, h = max(2, w // 2 * 2), max(2, h // 2 * 2)
+        en = ""
+        if "from" in r or "to" in r:
+            en = f":enable='between(t,{float(r.get('from', 0)):.3f},{float(r.get('to', dur)):.3f})'"
+        if r.get("mode") == "cover":
+            fg.append(f"{cur}drawbox=x={x}:y={y}:w={w}:h={h}:color={r.get('color', '#2A1A14')}@1:t=fill{en}[pv{i}]")
+        else:
+            fg.append(f"{cur}split[pa{i}][pc{i}]")
+            fg.append(f"[pc{i}]crop={w}:{h}:{x}:{y},gblur=sigma={int(r.get('strength', 40))}:steps=3[pbl{i}]")
+            fg.append(f"[pa{i}][pbl{i}]overlay={x}:{y}{en}[pv{i}]")
+        cur = f"[pv{i}]"
+    fg.append(f"{cur}[1:v]overlay=0:0:format=auto[gfx]")
     fg.append("[gfx]ass=subs.ass:fontsdir=fonts,format=yuv420p[vout]")
 
     fg.append("[0:a]asplit=2[voice][sc]")

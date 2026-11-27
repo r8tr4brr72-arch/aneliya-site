@@ -73,5 +73,10 @@
     "color": "#1A0F0C"
   },
   "hide_subs_on_final": true,
-  "cta_y": 1040
+  "cta_y": 1040,
+  "top_scrim": {
+    "to": 480,
+    "alpha": 0.45,
+    "color": "#1A0F0C"
+  }
 }

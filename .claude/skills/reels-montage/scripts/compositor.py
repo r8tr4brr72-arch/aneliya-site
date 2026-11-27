@@ -338,6 +338,16 @@ def build_overlays(comp: Compositor, plan: dict, style: dict, tl: Timeline, vide
             im.paste((*col, int(255 * a * t * t * (3 - 2 * t))), (0, y, im.width, y + 1))
         comp.add(Element(im, 0, y0, 0.0, video_end, "none", z=2, hold_to_end=True))
 
+    top = style.get("top_scrim")
+    if top and plan.get("headers"):   # soft shade from the top edge so the small caps header reads on light footage
+        y1, a = int(top.get("to", 460)), float(top.get("alpha", 0.45))
+        col = g.hex_rgb(top.get("color", "#1A0F0C"))
+        im = Image.new("RGBA", (style["width"], y1), (0, 0, 0, 0))
+        for y in range(y1):
+            t = 1 - y / y1
+            im.paste((*col, int(255 * a * t * t * (3 - 2 * t))), (0, y, im.width, y + 1))
+        comp.add(Element(im, 0, 0, 0.0, video_end, "none", z=2, hold_to_end=True))
+
     heads = sorted(plan.get("headers", []), key=lambda h: h["at"])
     hdr = {"serif": g.serif_header, "caps": g.header_caps}.get(style.get("header_kind"), g.header)
     minimal = style.get("graphics") == "minimal"
