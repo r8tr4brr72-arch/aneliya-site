@@ -122,6 +122,10 @@ def build_ass(words: list[dict], tl: Timeline, plan: dict, style: dict, path: Pa
         s, e = tl.map(w["s"]), tl.map(w["e"])
         if s >= sub_end:
             continue
+        if ws and text.startswith("-") and len(text) > 1:   # Whisper splits particles: «всё» + «-таки» → «всё-таки»
+            ws[-1]["w"] += text
+            ws[-1]["e"] = max(e, ws[-1]["e"])
+            continue
         ws.append({"w": text, "s": s, "e": max(e, s + 0.08), "key": any(_norm(text).startswith(h) for h in highlights)})
 
     chunks, cur = [], []
