@@ -5,6 +5,8 @@ description: Монтаж вертикальных видео (Reels / Shorts / 
 
 # Монтаж Reels из сырого видео
 
+> Перед монтажом прочитай `../video-director/LESSONS.md` и рецепты в `../video-director/recipes/` (например, `audio-review` для отзывов). Утверждённые правки закрепляй по `../video-director/EVOLUTION.md`.
+
 Пайплайн: **расшифровка → план монтажа (это делаешь ты, Claude) → рендер → проверка кадров → финальный рендер**.
 Скрипты лежат в папке `scripts/` рядом с этим файлом. Дальше `SKILL` = путь к папке этого скилла
 (обычно `%USERPROFILE%\.claude\skills\reels-montage`). На Windows запускай `python` (если не найден — `py`).

@@ -1,0 +1,15 @@
+{
+  "style": "lila-audio",
+  "headers": [{"at": 0, "text": "Отзыв после игры «Лила»"}],
+  "audiogram": {"y": 640, "label": "голосовое участницы"},
+  "blur": [{"x": 0, "y": 0, "w": 1080, "h": 1920, "strength": 38}],
+  "veil": {"color": "#2A2E1E", "alpha": 0.55},
+  "background_alternative": {"video": "videos/fon.mp4", "blur": 0, "_note": "переименуй в background и убери blur, чтобы фоном было своё видео; veil alpha 0.45"},
+  "highlight": [],
+  "replace": {},
+  "cards": [],
+  "cta": {"keyword": "ЛИЛА", "title": "Хочешь на игру «Лила»?", "subtitle": "Напиши в директ", "bar_text": "", "final_seconds": 3},
+  "sfx": true,
+  "music": null,
+  "keep": "← заполняет draft_plan.py; все zoom = false"
+}
